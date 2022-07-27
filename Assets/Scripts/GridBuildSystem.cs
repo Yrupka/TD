@@ -18,7 +18,7 @@ public class GridBuildSystem : MonoBehaviour
     private void Start()
     {
         int height = 10;
-        int width = 7;
+        int width = 10;
         lastBuilded = new List<Vector2Int>();
 
         grid = new GridMap(height, width, 1f, new Vector3(-height / 2f, 0, -width / 2f));
@@ -31,7 +31,7 @@ public class GridBuildSystem : MonoBehaviour
         if (Input.GetMouseButtonDown(1))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue, layerMask))
+            if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue, LayerMask.GetMask("Ground")))
             {
                 BuildTower(raycastHit.point);
             }       
@@ -45,7 +45,7 @@ public class GridBuildSystem : MonoBehaviour
         if (grid.GetXZ(globalPos, out int x, out int z))
         {
             Instantiate(tower, grid.GetWorldPos(x, z), Quaternion.identity);
-            onManaChange?.Invoke(mana--);
+            onManaChange?.Invoke(--mana);
             lastBuilded.Add(new Vector2Int(x, z));
         }   
     }

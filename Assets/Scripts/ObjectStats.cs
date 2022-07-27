@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterPortrait : MonoBehaviour
+public class ObjectStats : MonoBehaviour
 {
     private Transform cameraTransform;
-    private Transform character;
+    private Vector3 followPosition;
 
     private void Start()
     {
@@ -15,18 +15,18 @@ public class CharacterPortrait : MonoBehaviour
     
     private void Update()
     {
-        cameraTransform.position = new Vector3(character.position.x, character.position.y, 10f);
+        cameraTransform.position = new Vector3(followPosition.x, followPosition.y + 1f, followPosition.z - 1f);
     }
 
-    public void Show(Transform transform)
+    public void Show(Transform character)
     {
-        if (transform == null)
+        if (character == null)
         {
             Hide();
             return;
         }
         gameObject.SetActive(true);
-        this.character = transform;
+        followPosition = character.position;
     }
     private void Hide()
     {

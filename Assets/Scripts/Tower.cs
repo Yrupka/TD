@@ -2,11 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tower : IPlaceble
+public class Tower : ICharacter
 {
-    public Vector2 position { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public int attack { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public int poison { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public bool magic { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-    public bool isDeleted { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    private int attack; // размер атаки
+    private int poison; // количество урона от яда, если есть
+    private bool magic; // вышка магического типа?
+    public bool newPlaced; // новый объект или нет?
+
+    public Vector3 position { get; set; }
+    public string name { get; set; }
+
+    public Tower(string name, Vector3 position, int attack, int poison, bool magic)
+    {
+        this.name = name;
+        this.position = position;
+        this.attack = attack;
+        this.poison = poison;
+        this.magic = magic;
+        this.newPlaced = true;
+    }
 }

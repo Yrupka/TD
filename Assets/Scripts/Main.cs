@@ -8,6 +8,7 @@ public class Main : MonoBehaviour
     [SerializeField] private UIInterface mInterface;
     [SerializeField] private GridBuildSystem gridBuildSystem;
     [SerializeField] private MainCamera mCamera;
+    [SerializeField] private ObjectStats objectStats;
     
     private int health = 100;
 
@@ -15,6 +16,7 @@ public class Main : MonoBehaviour
     void Start()
     {
         GridBuildSystem.onManaChange += ChangeMana;
+        MainCamera.selected += objectStats.Show;
     }
 
     private void ChangeMana(int mana)
