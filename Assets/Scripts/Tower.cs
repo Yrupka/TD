@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tower : ICharacter
+public class Tower : MonoBehaviour
 {
     private int attack; // размер атаки
     private int poison; // количество урона от яда, если есть
@@ -10,7 +10,7 @@ public class Tower : ICharacter
     public bool newPlaced; // новый объект или нет?
 
     public Vector3 position { get; set; }
-    public string name { get; set; }
+    public new string name { get; set; }
 
     public Tower(string name, Vector3 position, int attack, int poison, bool magic)
     {

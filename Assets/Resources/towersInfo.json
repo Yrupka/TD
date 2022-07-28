@@ -1,0 +1,20 @@
+{
+    "Items": [
+        {
+            "name": "poison_1",
+            "attack": 10,
+            "range": 400,
+            "magic": true,
+            "poison": 4,
+            "splash": 0
+        },
+        {
+            "name": "poison_2",
+            "attack": 20,
+            "range": 400,
+            "magic": true,
+            "poison": 8,
+            "splash": 0
+        }
+    ]
+}

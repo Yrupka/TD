@@ -322,6 +322,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tower: {fileID: 487153542835679580, guid: bac3e22ddb1c75446881bdba0285b8a7, type: 3}
+  rock: {fileID: 3837272316233224468, guid: 5fdf46ec7f75d4341b245f1fa274ba07, type: 3}
   layerMask:
     serializedVersion: 2
     m_Bits: 512
