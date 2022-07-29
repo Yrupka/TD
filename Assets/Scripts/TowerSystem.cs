@@ -37,20 +37,18 @@ public class TowerSystem
         allTowerList = JsonHelper.FromJson<AllTowerList>(text.text);
     }
 
-    private Tower CreateTower(int x, int z)
+    private void CreateTower(Tower tower)
     {
-
-        int towerNumber = Random.Range(0, 1);
-        Tower tower = new Tower(allTowerList[towerNumber].name, new Vector3(x, 0, z), 
-            allTowerList[towerNumber].attack, allTowerList[towerNumber].poison,
-            allTowerList[towerNumber].magic);
-        return tower;
+        int towerNumber = Random.Range(0, 2);
+        tower.SetStats(allTowerList[towerNumber].name, allTowerList[towerNumber].attack, 
+        allTowerList[towerNumber].poison, allTowerList[towerNumber].magic);
     }
 
-    public void AddTower(int x, int z)
+    public void AddTower(Transform body)
     {
-        towers.Add(CreateTower(x, z));
-        lastBuilded.Add(new Vector2Int(x, z));
+        Tower tower = body.GetComponent<Tower>();
+        CreateTower(tower);
+        towers.Add(tower);
     }
 
     public void RemoveTower(Tower tower)

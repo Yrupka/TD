@@ -51,19 +51,9 @@ public class GridBuildSystem : MonoBehaviour
             return;
         if (grid.GetXZ(globalPos, out int x, out int z))
         {
-            Instantiate(tower, grid.GetWorldPos(x, z), Quaternion.identity);
+            Transform builded = Instantiate(tower, grid.GetWorldPos(x, z), Quaternion.identity);
             onManaChange?.Invoke(--mana);
-            towerSystem.AddTower(x, z);
-        }
-    }
-
-    private void BuildRock(Vector3 globalPos)
-    {
-        if (mana == 0)
-            return;
-        if (grid.GetXZ(globalPos, out int x, out int z))
-        {
-            Instantiate(rock, grid.GetWorldPos(x, z), Quaternion.identity);
+            towerSystem.AddTower(builded);
         }
     }
 
