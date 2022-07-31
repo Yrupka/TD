@@ -19,12 +19,10 @@ public class MainCamera : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue, LayerMask.GetMask("Character")))
+            if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue))
             {
                 selected?.Invoke(raycastHit.transform);
             }
-            else
-                selected?.Invoke(null);
         }
     }
 

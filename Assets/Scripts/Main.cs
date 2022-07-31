@@ -17,6 +17,7 @@ public class Main : MonoBehaviour
     {
         GridBuildSystem.onManaChange += ChangeMana;
         MainCamera.selected += objectStats.Show;
+        TowerSystem.makeRocks += gridBuildSystem.UpdateGrid;
     }
 
     private void ChangeMana(int mana)

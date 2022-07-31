@@ -1,0 +1,18 @@
+{
+    "Items": [
+        {
+            "name": "unit_1",
+            "health": 100,
+            "armor": 1,
+            "magicArmor": 1,
+            "speed": 100
+        },
+        {
+            "name": "unit_2",
+            "health": 200,
+            "armor": 2,
+            "magicArmor": 1,
+            "speed": 150
+        }
+    ]
+}
