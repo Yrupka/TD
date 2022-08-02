@@ -9,6 +9,7 @@ public class Main : MonoBehaviour
     [SerializeField] private GridBuildSystem gridBuildSystem;
     [SerializeField] private MainCamera mCamera;
     [SerializeField] private ObjectStats objectStats;
+    //[SerializeField] private LevelSystem levelSystem;
     
     private int health = 100;
 
@@ -18,6 +19,7 @@ public class Main : MonoBehaviour
         GridBuildSystem.onManaChange += ChangeMana;
         MainCamera.selected += objectStats.Show;
         TowerSystem.makeRocks += gridBuildSystem.UpdateGrid;
+        //UIInterface.onStart += levelSystem.StartWave;
     }
 
     private void ChangeMana(int mana)

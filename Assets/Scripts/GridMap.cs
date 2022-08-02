@@ -31,6 +31,9 @@ public class GridMap
 
         objects = new Dictionary<Vector2Int, Tile>();
     }
+    public int GetWidth() { return width; }
+    public int GetHeight() { return height; }
+    public float GetTileSize() { return size; }
 
     // получить глобальные координаты ячейки
     public Vector3 GetWorldPos(int x, int z)
@@ -52,6 +55,14 @@ public class GridMap
             return false;
         else
             return true;
+    }
+
+    public bool CanWalk(int x, int z)
+    {
+        if (objects[new Vector2Int(x, z)].type == 0)
+            return true;
+        else
+            return false;
     }
     public void BuildObject(Transform obj, int type)
     {

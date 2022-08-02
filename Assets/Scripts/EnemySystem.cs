@@ -28,20 +28,17 @@ public class EnemySystem
         allEnemyModels = Resources.LoadAll<Transform>("Prefabs");
     }
 
-    private void Create(Enemy enemy)
+
+    public void Spawn(int num)
     {
-        int enemyNumber = UnityEngine.Random.Range(0, 2);
+        int enemyNumber = UnityEngine.Random.Range(0, allEnemyStats.Length);
+        Transform obj = Enemy.Create(allEnemyModels[enemyNumber]);
+        Enemy enemy = obj.GetComponent<Enemy>();
 
         string newEnemyName = allEnemyStats[enemyNumber].name;
         enemy.SetStats(newEnemyName, allEnemyStats[enemyNumber].health,
             allEnemyStats[enemyNumber].armor, allEnemyStats[enemyNumber].magicArmor,
             allEnemyStats[enemyNumber].speed);
-    }
-
-    public void Add(Transform body)
-    {
-        Enemy enemy = body.GetComponent<Enemy>();
-        Create(enemy);
         enemies.Add(enemy);
     }
 
@@ -63,5 +60,10 @@ public class EnemySystem
 
         }
         return closest;
+    }
+
+    public int GetWavesNumber()
+    {
+        return allEnemyStats.Length;
     }
 }

@@ -14,6 +14,12 @@ public class Enemy : MonoBehaviour
 
     private Slider healthBar;
 
+    public static Transform Create(Transform enemy)
+    {
+        Transform created = Instantiate(enemy);
+        return created;
+    }
+
     public void SetStats(string name, int health, int armor, int magicArmor, int speed)
     {
         healthBar = transform.Find("Canvas").Find("HealthBar").GetComponent<Slider>();
@@ -58,5 +64,10 @@ public class Enemy : MonoBehaviour
     public Vector3 GetPosition()
     {
         return this.transform.position;
+    }
+
+    private void Move()
+    {
+        
     }
 }
