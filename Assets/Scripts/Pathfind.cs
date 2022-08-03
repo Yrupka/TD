@@ -31,7 +31,7 @@ public class Pathfind
         }
     }
 
-    private List<Node> grid;
+    private Node[,] grid;
     private List<Node> openList;
     private HashSet<Node> closeList;
     private GridMap gridMap;
@@ -39,14 +39,14 @@ public class Pathfind
     public Pathfind(GridMap grid)
     {
         gridMap = grid;
-        this.grid = new List<Node>();
+        this.grid = new Node[grid.GetWidth(), grid.GetHeight()];
     }
 
-    private List<Vector3> FindPath(Vector3 start, Vector3 end)
+    public List<Vector3> FindPath(Vector3Int start, Vector3Int end)
     {
-        gridMap.GetXZ(start, out int startX, out int startY);
-        gridMap.GetXZ(end, out int endX, out int endY);
-        List<Node> path = FindPath(startX, startY, endX, endY);
+        // gridMap.GetXZ(start, out int startX, out int startY);
+        // gridMap.GetXZ(end, out int endX, out int endY);
+        List<Node> path = FindPath(start.x, start.y, end.x, end.y);
         if (path == null)
             return null;
         else
@@ -54,9 +54,7 @@ public class Pathfind
             List<Vector3> vectorPath = new List<Vector3>();
             foreach (var node in path)
             {
-                vectorPath.Add(new Vector3(node.x, 0 ,node.y) *
-                    gridMap.GetTileSize() +
-                    Vector3.one * gridMap.GetTileSize() * 0.5f);
+                vectorPath.Add(gridMap.GetWorldPos(node.x, node.y));
             }
             return vectorPath;
         }
@@ -65,9 +63,7 @@ public class Pathfind
 
     private List<Node> FindPath(int startX, int startY, int endX, int endY)
     {
-        Node startNode = new Node(startX, startY);
-        Node endNode = new Node(endX, endY);
-        openList = new List<Node>() { startNode };
+        openList = new List<Node>();
         closeList = new HashSet<Node>();
 
         for (int x = 0; x < gridMap.GetWidth(); x++)
@@ -80,10 +76,14 @@ public class Pathfind
                 node.CalculateFCost();
                 node.lastNode = null;
 
-                grid.Add(node);
+                grid[x, y] = node;
             }
         }
 
+        Node startNode = grid[startX, startY];
+        Node endNode = grid[endX, endY];
+        openList.Add(startNode);
+        
         startNode.gCost = 0;
         startNode.hCost = CalculateDistanceCost(startNode, endNode);
         startNode.CalculateFCost();
@@ -91,8 +91,9 @@ public class Pathfind
         while(openList.Count > 0)
         {
             Node current = GetLowestFCostNode(openList);
-            if (current == endNode)
+            if (current.x == endNode.x && current.y == endNode.y)
                 return CalculatePath(endNode);
+                
         
             openList.Remove(current);
             closeList.Add(current);
@@ -122,9 +123,9 @@ public class Pathfind
     }
 
     // получаем соседей, в этом порядке:
-    // 1 4 6
-    // 2 x 7
-    // 3 5 8
+    // 3 6 9
+    // 2 x 8
+    // 1 4 7
     private List<Node> GetNeighbors(Node current)
     {
         List<Node> neighbors = new List<Node>();
@@ -134,13 +135,13 @@ public class Pathfind
             for (int yOffset = -1; yOffset <= 1; yOffset++)
             {
                 // центр - это сама ячейка
-                if (xOffset == 0 && xOffset == 0)
+                if (xOffset == 0 && yOffset == 0)
                     continue;
                 // выход за границе по одной из координат
-                if ((current.x + xOffset < 0 || current.x + xOffset > gridMap.GetHeight()) ||
-                    (current.y + yOffset < 0 || current.y + yOffset > gridMap.GetWidth()))
+                if ((current.x + xOffset < 0 || current.x + xOffset > gridMap.GetWidth()) ||
+                    (current.y + yOffset < 0 || current.y + yOffset > gridMap.GetHeight()))
                     continue;
-                neighbors.Add(new Node(current.x + xOffset, current.y + yOffset));
+                neighbors.Add(grid[current.x + xOffset, current.y + yOffset]);
             }
         }
         return neighbors;

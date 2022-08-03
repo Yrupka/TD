@@ -2,7 +2,7 @@
     "Items": [
         {
             "name": "poison_1",
-            "attack": 10,
+            "attack": 0,
             "range": 400,
             "attackSpeed": 1.0,
             "magic": true,
@@ -11,7 +11,7 @@
         },
         {
             "name": "poison_2",
-            "attack": 20,
+            "attack": 0,
             "range": 400,
             "attackSpeed": 0.8,
             "magic": true,

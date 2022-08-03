@@ -7,12 +7,15 @@ public class GridBuildSystem : MonoBehaviour
 {
     private GridMap grid;
     private TowerSystem towerSystem;
-    private EnemySystem enemySystem;
+    private Pathfind pathfind;
     private Transform tower;
     private Transform rock;
     private Transform point;
     [SerializeField] private Transform ground;
-    
+
+    private Vector3Int[] pointsPos;
+    private List<Vector3> path;
+
     private int mana = 5;
     public static Action<int> onManaChange;
 
@@ -24,19 +27,21 @@ public class GridBuildSystem : MonoBehaviour
         tower = Resources.Load<Transform>("Prefabs/Tower");
         rock = Resources.Load<Transform>("Prefabs/Rock");
         point = Resources.Load<Transform>("Prefabs/Point");
-        Vector2Int[] pointsPos = new Vector2Int[5] {
-            new Vector2Int(5, 19), new Vector2Int(32, 19),
-            new Vector2Int(32, 5), new Vector2Int(19, 5),
-            new Vector2Int(19, 32)
+
+        pointsPos = new Vector3Int[7] {
+            new Vector3Int(4, 31), new Vector3Int(4, 18), new Vector3Int(32, 20),
+            new Vector3Int(32, 32), new Vector3Int(20, 32), new Vector3Int(18, 4),
+            new Vector3Int(32, 4)
         };
-        CreatePoints(pointsPos);
+        path = new List<Vector3>();
 
         grid = new GridMap(height, width, 1f, new Vector3(-height / 2f, 0, -width / 2f));
         ground.localScale = new Vector3(height / 10f, 1f, width / 10f);
         ground.GetComponent<Renderer>().material.mainTextureScale = new Vector2(height, width);
-        
+        CreatePoints(pointsPos);
+
+        pathfind = new Pathfind(grid);
         towerSystem = new TowerSystem();
-        enemySystem = new EnemySystem();
     }
 
     private void Update()
@@ -47,7 +52,7 @@ public class GridBuildSystem : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue, LayerMask.GetMask("Ground")))
             {
                 BuildTower(raycastHit.point);
-            }       
+            }
         }
         // if (Input.GetMouseButtonDown(2))
         // {
@@ -60,15 +65,15 @@ public class GridBuildSystem : MonoBehaviour
         // }
     }
 
-    private void CreatePoints(Vector2Int[] pointsPos)
+    private void CreatePoints(Vector3Int[] pointsPos)
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 1; i < 6; i++)
         {
-            Transform pointObj = Instantiate(point, grid.GetWorldPos(pointsPos[i].x, pointsPos[i].y), Quaternion.identity);
-            pointObj.GetComponent<TextMesh>().text = (i + 1).ToString();
-            grid.BuildObject(pointObj, 2);
+            Transform pointObj = Instantiate(point, grid.GetWorldPos(pointsPos[i].x, pointsPos[i].y), new Quaternion(0f, 0f, 0f, 0f));
+            pointObj.Find("Visual").GetComponent<TextMesh>().text = (i).ToString();
+            grid.BuildObject(pointObj, 3);
         }
-        
+
     }
 
     private void BuildTower(Vector3 globalPos)
@@ -78,10 +83,18 @@ public class GridBuildSystem : MonoBehaviour
         if (grid.CanBuild(globalPos))
         {
             grid.GetXZ(globalPos, out int x, out int z);
-            Transform builded = Instantiate(tower, grid.GetWorldPos(x, z), Quaternion.identity);
-            onManaChange?.Invoke(--mana);
-            towerSystem.Add(builded);
-            grid.BuildObject(builded, 2);
+            grid.TempBuild(x, z);
+            
+            if (UpdateGridSector(x, z))
+            {
+                grid.UndoBuild(x, z);
+                Transform builded = Instantiate(tower, grid.GetWorldPos(x, z), Quaternion.identity);
+                onManaChange?.Invoke(--mana);
+                towerSystem.Add(builded);
+                grid.BuildObject(builded, 2);
+            }
+            else
+                grid.UndoBuild(x, z);
         }
         else
         {
@@ -98,7 +111,26 @@ public class GridBuildSystem : MonoBehaviour
             grid.GetXZ(item, out int x, out int z);
             Transform builded = Instantiate(rock, grid.GetWorldPos(x, z), Quaternion.identity);
             grid.BuildObject(builded, 1);
-            
+
         }
+    }
+
+    public List<Vector3> GetPath()
+    {
+        return path;
+    }
+
+    private bool UpdateGridSector(int x, int z)
+    {
+        path.Clear();
+        List<Vector3>[] paths = new List<Vector3>[6];
+        for (int i = 0; i < 6; i++)
+        {
+            paths[i] = pathfind.FindPath(pointsPos[i], pointsPos[i + 1]);
+            if (paths == null)
+                return false;
+            path.AddRange(paths[i]);
+        }
+        return true;
     }
 }

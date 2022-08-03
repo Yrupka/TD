@@ -25,20 +25,17 @@ public class EnemySystem
         var text = Resources.Load<TextAsset>("enemiesInfo");
         allEnemyStats = JsonHelper.FromJson<AllEnemyList>(text.text);
 
-        allEnemyModels = Resources.LoadAll<Transform>("Prefabs");
+        allEnemyModels = Resources.LoadAll<Transform>("Enemies");
     }
 
-
-    public void Spawn(int num)
+    public void Spawn(int enemyNumber, List<Vector3> path)
     {
-        int enemyNumber = UnityEngine.Random.Range(0, allEnemyStats.Length);
-        Transform obj = Enemy.Create(allEnemyModels[enemyNumber]);
-        Enemy enemy = obj.GetComponent<Enemy>();
-
+        Enemy enemy = Enemy.Create(allEnemyModels[enemyNumber]).GetComponent<Enemy>();
         string newEnemyName = allEnemyStats[enemyNumber].name;
         enemy.SetStats(newEnemyName, allEnemyStats[enemyNumber].health,
             allEnemyStats[enemyNumber].armor, allEnemyStats[enemyNumber].magicArmor,
             allEnemyStats[enemyNumber].speed);
+        enemy.SetPath(path);
         enemies.Add(enemy);
     }
 

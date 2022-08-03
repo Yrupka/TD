@@ -59,16 +59,33 @@ public class GridMap
 
     public bool CanWalk(int x, int z)
     {
-        if (objects[new Vector2Int(x, z)].type == 0)
-            return true;
+        if (objects.ContainsKey(new Vector2Int(x, z)))
+        {
+            if (objects[new Vector2Int(x, z)].type == 3)
+                return true;
+            else
+                return false;
+        }
         else
-            return false;
+            return true;
     }
+    
+    // type = 0 - пусто, 1 - камень, 2 - башня, 3 - точка
     public void BuildObject(Transform obj, int type)
     {
         GetXZ(obj.position, out int x, out int z);
         objects.Add(new Vector2Int(x, z), new Tile(type, obj));
 
+    }
+
+    public void TempBuild(int x, int z)
+    {
+        objects.Add(new Vector2Int(x, z), new Tile(1, null));
+    }
+
+    public void UndoBuild(int x, int z)
+    {
+        objects.Remove(new Vector2Int(x, z));
     }
 
     public void DestroyObjects(params Vector3[] objects)
