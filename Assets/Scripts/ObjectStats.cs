@@ -89,16 +89,15 @@ public class ObjectStats : MonoBehaviour
     {
         if (tower == null)
             return;
-        Texture2D[] textures = tower.GetUpgrade();
 
-        for (int i = 0; i < textures.Length; i++)
+        for (int i = 0; i < tower.Upgrades.Length; i++)
         {
             Transform action = actions.Find($"A{i + 1}");
             action.gameObject.SetActive(true);
-            action.GetComponent<RawImage>().texture = textures[i];
+            action.GetComponent<RawImage>().texture = tower.Upgrades[i];
             action.GetComponent<Button>().onClick.RemoveAllListeners();
             action.GetComponent<Button>().onClick.AddListener(
-                () => { tower.UpgradeChoice(i); Hide(); ActionsVisibility(false); });
+                () => { tower.UpgradeNumber = i; Hide(); ActionsVisibility(false); });
         }
 
     }

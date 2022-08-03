@@ -8,19 +8,7 @@ public class GridMap
     private int height;
     private float size;
     private Vector3 originPos;
-    private Dictionary<Vector2Int, Tile> objects;
-
-    private struct Tile
-    {
-        public int type;
-        public Transform obj;
-
-        public Tile(int type, Transform obj)
-        {
-            this.type = type;
-            this.obj = obj;
-        }
-    }
+    private Dictionary<Vector2Int, int> objects;
 
     public GridMap(int width, int height, float size, Vector3 originPos)
     {
@@ -29,7 +17,7 @@ public class GridMap
         this.size = size;
         this.originPos = originPos;
 
-        objects = new Dictionary<Vector2Int, Tile>();
+        objects = new Dictionary<Vector2Int, int>();
     }
     public int GetWidth() { return width; }
     public int GetHeight() { return height; }
@@ -61,7 +49,7 @@ public class GridMap
     {
         if (objects.ContainsKey(new Vector2Int(x, z)))
         {
-            if (objects[new Vector2Int(x, z)].type == 3)
+            if (objects[new Vector2Int(x, z)] == 3)
                 return true;
             else
                 return false;
@@ -71,16 +59,16 @@ public class GridMap
     }
     
     // type = 0 - пусто, 1 - камень, 2 - башня, 3 - точка
-    public void BuildObject(Transform obj, int type)
+    public void BuildObject(Vector3 pos, int type)
     {
-        GetXZ(obj.position, out int x, out int z);
-        objects.Add(new Vector2Int(x, z), new Tile(type, obj));
+        GetXZ(pos, out int x, out int z);
+        objects.Add(new Vector2Int(x, z), type);
 
     }
 
     public void TempBuild(int x, int z)
     {
-        objects.Add(new Vector2Int(x, z), new Tile(1, null));
+        objects.Add(new Vector2Int(x, z), 1);
     }
 
     public void UndoBuild(int x, int z)
@@ -88,12 +76,11 @@ public class GridMap
         objects.Remove(new Vector2Int(x, z));
     }
 
-    public void DestroyObjects(params Vector3[] objects)
+    public void RemoveObjects(params Vector3[] objects)
     {
         for (int i = 0; i < objects.Length; i++)
         {
             GetXZ(objects[i], out int x, out int z);
-            GameObject.Destroy(this.objects[new Vector2Int(x, z)].obj.gameObject);
             this.objects.Remove(new Vector2Int(x, z));
         }
     }

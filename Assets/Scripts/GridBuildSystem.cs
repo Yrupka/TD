@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GridBuildSystem : MonoBehaviour
@@ -8,13 +8,13 @@ public class GridBuildSystem : MonoBehaviour
     private GridMap grid;
     private TowerSystem towerSystem;
     private Pathfind pathfind;
-    private Transform tower;
     private Transform rock;
     private Transform point;
     [SerializeField] private Transform ground;
 
     private Vector3Int[] pointsPos;
     private List<Vector3> path;
+    private List<Transform> rocks;
 
     private int mana = 5;
     public static Action<int> onManaChange;
@@ -24,16 +24,16 @@ public class GridBuildSystem : MonoBehaviour
         int height = 37;
         int width = 37;
 
-        tower = Resources.Load<Transform>("Prefabs/Tower");
         rock = Resources.Load<Transform>("Prefabs/Rock");
         point = Resources.Load<Transform>("Prefabs/Point");
 
         pointsPos = new Vector3Int[7] {
-            new Vector3Int(4, 31), new Vector3Int(4, 18), new Vector3Int(32, 20),
-            new Vector3Int(32, 32), new Vector3Int(20, 32), new Vector3Int(18, 4),
+            new Vector3Int(4, 31), new Vector3Int(4, 18), new Vector3Int(32, 18),
+            new Vector3Int(32, 32), new Vector3Int(18, 32), new Vector3Int(18, 4),
             new Vector3Int(32, 4)
         };
         path = new List<Vector3>();
+        rocks = new List<Transform>();
 
         grid = new GridMap(height, width, 1f, new Vector3(-height / 2f, 0, -width / 2f));
         ground.localScale = new Vector3(height / 10f, 1f, width / 10f);
@@ -70,8 +70,8 @@ public class GridBuildSystem : MonoBehaviour
         for (int i = 1; i < 6; i++)
         {
             Transform pointObj = Instantiate(point, grid.GetWorldPos(pointsPos[i].x, pointsPos[i].y), new Quaternion(0f, 0f, 0f, 0f));
-            pointObj.Find("Visual").GetComponent<TextMesh>().text = (i).ToString();
-            grid.BuildObject(pointObj, 3);
+            pointObj.Find("Visual").GetComponent<TextMeshPro>().text = (i).ToString();
+            grid.BuildObject(pointsPos[i], 3);
         }
 
     }
@@ -85,33 +85,32 @@ public class GridBuildSystem : MonoBehaviour
             grid.GetXZ(globalPos, out int x, out int z);
             grid.TempBuild(x, z);
             
-            if (UpdateGridSector(x, z))
+            if (UpdatePath(x, z))
             {
                 grid.UndoBuild(x, z);
-                Transform builded = Instantiate(tower, grid.GetWorldPos(x, z), Quaternion.identity);
                 onManaChange?.Invoke(--mana);
-                towerSystem.Add(builded);
-                grid.BuildObject(builded, 2);
+                Transform builded = towerSystem.Create(grid.GetWorldPos(x, z));
+                grid.BuildObject(globalPos, 2);
             }
             else
                 grid.UndoBuild(x, z);
         }
         else
         {
-            //todo сообщение нельзя тут строить
+            PopUpDialog.Create(globalPos, "Тут нельзя строить!");
         }
     }
 
-    public void UpdateGrid(params Vector3[] towersPos)
+    public void UpdateGrid(params Vector3[] towers)
     {
-        grid.DestroyObjects(towersPos);
+        grid.RemoveObjects(towers);
 
-        foreach (var item in towersPos)
+        foreach (var tower in towers)
         {
-            grid.GetXZ(item, out int x, out int z);
+            grid.GetXZ(tower, out int x, out int z);
             Transform builded = Instantiate(rock, grid.GetWorldPos(x, z), Quaternion.identity);
-            grid.BuildObject(builded, 1);
-
+            grid.BuildObject(tower, 1);
+            rocks.Add(builded);
         }
     }
 
@@ -120,7 +119,7 @@ public class GridBuildSystem : MonoBehaviour
         return path;
     }
 
-    private bool UpdateGridSector(int x, int z)
+    private bool UpdatePath(int x, int z)
     {
         path.Clear();
         List<Vector3>[] paths = new List<Vector3>[6];

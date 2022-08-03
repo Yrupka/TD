@@ -4,8 +4,8 @@ using System;
 public class MainCamera : MonoBehaviour
 {
     float edgeOffset = 20f;
-    float moveStep = 20f;
-    float zoomStep = 20f;
+    float moveStep = 40f;
+    float zoomStep = 40f;
     Vector3 cameraPosition = new Vector3(0, 10, 0);
 
     public static Action<Transform> selected;

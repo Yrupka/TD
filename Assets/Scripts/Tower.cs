@@ -9,19 +9,47 @@ public class Tower : MonoBehaviour
     private float attackSpeed; // скорость атак
     private int poison; // количество урона от яда, если есть
     private bool magic; // вышка магического типа?
+    private int level; // уровень вышки (базовых типов)
+    public int Level { get { return level; } }
     private new string name;
+    public string Name { get { return name; } }
     private Texture2D[] upgrades;
+    public Texture2D[] Upgrades
+    {
+        get { return upgrades; }
+        set
+        {
+            upgrades = value;
+            upgradeNumber = upgrades == null ? -2 : -1;
+        }
+    }
     private int upgradeNumber;
+    public int UpgradeNumber
+    {
+        get { return upgradeNumber; }
+        set
+        {
+            upgradeNumber = value;
+            upgraded?.Invoke();
+        }
+    }
     private float shootTimer;
 
     public Action upgraded;
 
-    public void SetStats(string name, int attack, int range, float attackSpeed, int poison, bool magic)
+    public static Transform Create(Transform model, Vector3 pos)
+    {
+        Transform created = Instantiate(model, pos, Quaternion.identity);
+        return created;
+    }
+
+    public void SetStats(string name, int level, int attack, int range, float attackSpeed, int poison, bool magic)
     {
         upgrades = new Texture2D[3];
         upgradeNumber = -2;
 
         this.name = name;
+        this.level = level;
         this.attack = attack;
         this.range = range;
         this.attackSpeed = attackSpeed;
@@ -39,38 +67,9 @@ public class Tower : MonoBehaviour
         magic = this.magic;
     }
 
-    public void SetUpgrade(Texture2D[] upgrades)
-    {
-        this.upgrades = upgrades;
-        upgradeNumber = upgrades == null ? -2 : -1;
-    }
-
-    public Texture2D[] GetUpgrade()
-    {
-        return upgrades;
-    }
-
-    public void UpgradeChoice(int num)
-    {
-        upgradeNumber = num;
-        upgraded?.Invoke();
-    }
-
-    public int GetUpgradeNumber()
-    {
-        return upgradeNumber;
-    }
     // --- Атака вышки ---
     private void Update()
     {
-        // if (Input.GetMouseButtonDown(0))
-        // {
-        //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        //     if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue))
-        //     {
-        //         Bullet.Create(transform.position, raycastHit.point);
-        //     }
-        // }
         shootTimer -= Time.deltaTime;
 
         if (shootTimer <= 0f)

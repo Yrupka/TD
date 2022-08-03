@@ -5,7 +5,6 @@ using UnityEngine.UI;
 public class Enemy : MonoBehaviour
 {
     // --- Создание противника ---
-
     private new string name;
     private int health; // количество здоровья
     private int currHealth; // текущее количество здоровья
@@ -19,7 +18,7 @@ public class Enemy : MonoBehaviour
 
     public static Transform Create(Transform enemy)
     {
-        Transform created = Instantiate(enemy, new Vector3(-10.5f, 0f, 5.5f), Quaternion.identity);
+        Transform created = Instantiate(enemy, new Vector3(-14.5f, 0f, 13.5f), Quaternion.identity);
         return created;
     }
 

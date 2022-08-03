@@ -16,19 +16,12 @@ public class TowerSystem
         public int splash;
     }
 
-    private enum Towers
-    {
-        poison,
-        vision,
-        speed,
-        normal,
-        splash
-    }
-
-    private Dictionary<string, Texture2D> textures;
     private List<Tower> towers;
     private List<int> upgradeNumbers;
-    AllTowerList[] allTowerList;
+    // массивы текстур, моделей, параметров вышек
+    private AllTowerList[] allTowerStats;
+    private Transform[] allTowerModels;
+    private Dictionary<string, Texture2D> textures;
 
     public static Action<Vector3[]> makeRocks;
 
@@ -41,55 +34,65 @@ public class TowerSystem
         textures = new Dictionary<string, Texture2D>();
         foreach (var item in images)
             textures.Add(item.name, item);
-            
+
         var text = Resources.Load<TextAsset>("towersInfo");
-        allTowerList = JsonHelper.FromJson<AllTowerList>(text.text);
+        allTowerStats = JsonHelper.FromJson<AllTowerList>(text.text);
+        allTowerModels = Resources.LoadAll<Transform>("Towers");
     }
 
-    private void Create(Tower tower)
+    public Transform Create(Vector3 pos)
     {
-        int towerNumber = UnityEngine.Random.Range(0, 2);
-        
+        int towerNumber = UnityEngine.Random.Range(0, 2); // тип вышки
+        int towerLevel = UnityEngine.Random.Range(1, 6); // уровень от 1 до 5
+        Tower tower = MakeTower(pos, towerNumber, towerLevel);
+
         upgradeNumbers.Add(towerNumber);
-        
-        string newTowerName = allTowerList[towerNumber].name;
-        tower.SetStats(newTowerName, allTowerList[towerNumber].attack,
-            allTowerList[towerNumber].range, allTowerList[towerNumber].attackSpeed,
-            allTowerList[towerNumber].poison, allTowerList[towerNumber].magic);
-        
-        tower.SetUpgrade(new Texture2D[] {textures[newTowerName]});
+
+        tower.Upgrades = new Texture2D[] { textures[tower.Name] };
         tower.upgraded += CheckTowers;
+        towers.Add(tower);
+        
+        return tower.transform;
     }
 
-    public void Add(Transform body)
+    private Tower MakeTower(Vector3 pos, int towerNumber, int level)
     {
-        Tower tower = body.GetComponent<Tower>();
-        Create(tower);
-        towers.Add(tower);
+        Tower tower = Tower.Create(allTowerModels[towerNumber], pos).GetComponent<Tower>();
+        tower.SetStats(allTowerStats[towerNumber].name, allTowerStats[towerNumber].attack, level,
+            allTowerStats[towerNumber].range, allTowerStats[towerNumber].attackSpeed,
+            allTowerStats[towerNumber].poison, allTowerStats[towerNumber].magic);
+        return tower;
+    }
+
+    private void CheckUpgrage()
+    {
+
     }
 
     public void CheckTowers()
     {
         // массив удаляемых вышек
-        List<Vector3> pos = new List<Vector3>();
+        List<Vector3> rocks = new List<Vector3>();
         for (int i = 0, j = 0; i < towers.Count; i++, j++)
         {
-            if (towers[i].GetUpgradeNumber() == -2)
+            if (towers[i].UpgradeNumber == -2)
                 continue;
-            if (towers[i].GetUpgradeNumber() == -1)
+            if (towers[i].UpgradeNumber == -1)
             {
-                pos.Add(towers[i].transform.position);
+                rocks.Add(towers[i].transform.position);
+                GameObject.Destroy(towers[i].gameObject);
                 towers.Remove(towers[i]);
                 i--;
             }
             else
             {
-                towers[i].SetUpgrade(null);
-                towers[i].SetStats(allTowerList[upgradeNumbers[j]].name, allTowerList[upgradeNumbers[j]].attack,
-                    allTowerList[upgradeNumbers[j]].range, allTowerList[upgradeNumbers[j]].attackSpeed,
-                    allTowerList[upgradeNumbers[j]].poison, allTowerList[upgradeNumbers[j]].magic);
+                int level = towers[i].Level;
+                Tower tower = MakeTower(towers[i].transform.position, upgradeNumbers[j], level);
+                GameObject.Destroy(towers[i].gameObject);
+                towers.Remove(towers[i]);
+                towers.Add(tower);
             }
         }
-        makeRocks?.Invoke(pos.ToArray());
+        makeRocks?.Invoke(rocks.ToArray());
     }
 }
