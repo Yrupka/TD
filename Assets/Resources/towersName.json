@@ -1,0 +1,16 @@
+{
+    "Items": [
+        {
+            "name": "Poison",
+            "rus": "Яд" 
+        },
+        {
+            "name": "Speed",
+            "rus": "Скорость" 
+        },
+        {
+            "name": "Armor",
+            "rus": "Броня" 
+        }
+    ]
+}

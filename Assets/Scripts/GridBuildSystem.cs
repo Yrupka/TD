@@ -14,7 +14,6 @@ public class GridBuildSystem : MonoBehaviour
 
     private Vector3Int[] pointsPos;
     private List<Vector3> path;
-    private List<Transform> rocks;
 
     private int mana = 5;
     public static Action<int> onManaChange;
@@ -28,12 +27,11 @@ public class GridBuildSystem : MonoBehaviour
         point = Resources.Load<Transform>("Prefabs/Point");
 
         pointsPos = new Vector3Int[7] {
-            new Vector3Int(4, 31), new Vector3Int(4, 18), new Vector3Int(32, 18),
+            new Vector3Int(4, 32), new Vector3Int(4, 18), new Vector3Int(32, 18),
             new Vector3Int(32, 32), new Vector3Int(18, 32), new Vector3Int(18, 4),
             new Vector3Int(32, 4)
         };
         path = new List<Vector3>();
-        rocks = new List<Transform>();
 
         grid = new GridMap(height, width, 1f, new Vector3(-height / 2f, 0, -width / 2f));
         ground.localScale = new Vector3(height / 10f, 1f, width / 10f);
@@ -49,9 +47,12 @@ public class GridBuildSystem : MonoBehaviour
         if (Input.GetMouseButtonDown(1))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue, LayerMask.GetMask("Ground")))
+            if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue, LayerMask.GetMask("Ground", "Rock")))
             {
                 BuildTower(raycastHit.point);
+                // вышки можно ставить вместо камней
+                if (raycastHit.transform.gameObject.layer == LayerMask.GetMask("Rock"))
+                    GameObject.Destroy(raycastHit.transform.gameObject);
             }
         }
         // if (Input.GetMouseButtonDown(2))
@@ -71,7 +72,7 @@ public class GridBuildSystem : MonoBehaviour
         {
             Transform pointObj = Instantiate(point, grid.GetWorldPos(pointsPos[i].x, pointsPos[i].y), new Quaternion(0f, 0f, 0f, 0f));
             pointObj.Find("Visual").GetComponent<TextMeshPro>().text = (i).ToString();
-            grid.BuildObject(pointsPos[i], 3);
+            grid.BuildObject(grid.GetWorldPos(pointsPos[i].x, pointsPos[i].y), 3);
         }
 
     }
@@ -79,29 +80,42 @@ public class GridBuildSystem : MonoBehaviour
     private void BuildTower(Vector3 globalPos)
     {
         if (mana == 0)
+        {
+            towerSystem.CheckNewTowers();
             return;
-        if (grid.CanBuild(globalPos))
-        {
-            grid.GetXZ(globalPos, out int x, out int z);
-            grid.TempBuild(x, z);
-            
-            if (UpdatePath(x, z))
-            {
-                grid.UndoBuild(x, z);
-                onManaChange?.Invoke(--mana);
-                Transform builded = towerSystem.Create(grid.GetWorldPos(x, z));
-                grid.BuildObject(globalPos, 2);
-            }
-            else
-                grid.UndoBuild(x, z);
         }
-        else
+            
+        // 0 - пусто, 1 - камень, 2 - башня, 3 - точка
+        int gridObject = grid.CanBuild(globalPos);
+        grid.GetXZ(globalPos, out int x, out int z);
+
+        switch (gridObject)
         {
-            PopUpDialog.Create(globalPos, "Тут нельзя строить!");
+            case 0:
+                grid.TempBuild(x, z);
+                if (UpdatePath(x, z))
+                {
+                    onManaChange?.Invoke(--mana);
+                    towerSystem.Create(grid.GetWorldPos(x, z));
+                    grid.RemoveBuild(x, z);
+                    grid.BuildObject(globalPos, 2);
+                }
+                else
+                    grid.RemoveBuild(x, z);
+                break;
+            case 1:
+                onManaChange?.Invoke(--mana);
+                towerSystem.Create(grid.GetWorldPos(x, z));
+                grid.RemoveBuild(x, z);
+                grid.BuildObject(globalPos, 2);
+                break;
+            default:
+                PopUpDialog.Create(globalPos, "Тут нельзя строить!");
+                break;
         }
     }
 
-    public void UpdateGrid(params Vector3[] towers)
+    public void UpdateGrid(Vector3[] towers)
     {
         grid.RemoveObjects(towers);
 
@@ -110,7 +124,6 @@ public class GridBuildSystem : MonoBehaviour
             grid.GetXZ(tower, out int x, out int z);
             Transform builded = Instantiate(rock, grid.GetWorldPos(x, z), Quaternion.identity);
             grid.BuildObject(tower, 1);
-            rocks.Add(builded);
         }
     }
 

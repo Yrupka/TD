@@ -5,8 +5,11 @@ using UnityEngine;
 public class GridMap
 {
     private int width;
+    public int Width { get { return width; } }
     private int height;
+    public int Height { get { return height; } }
     private float size;
+    public float Size { get { return size; } }
     private Vector3 originPos;
     private Dictionary<Vector2Int, int> objects;
 
@@ -19,9 +22,6 @@ public class GridMap
 
         objects = new Dictionary<Vector2Int, int>();
     }
-    public int GetWidth() { return width; }
-    public int GetHeight() { return height; }
-    public float GetTileSize() { return size; }
 
     // получить глобальные координаты ячейки
     public Vector3 GetWorldPos(int x, int z)
@@ -36,13 +36,13 @@ public class GridMap
         z = Mathf.FloorToInt((worldPos - originPos).z / size);
     }
 
-    public bool CanBuild(Vector3 pos)
+    public int CanBuild(Vector3 pos)
     {
         GetXZ(pos, out int x, out int z);
         if (objects.ContainsKey(new Vector2Int(x, z)))
-            return false;
+            return objects[new Vector2Int(x, z)];
         else
-            return true;
+            return 0;
     }
 
     public bool CanWalk(int x, int z)
@@ -57,13 +57,12 @@ public class GridMap
         else
             return true;
     }
-    
+
     // type = 0 - пусто, 1 - камень, 2 - башня, 3 - точка
     public void BuildObject(Vector3 pos, int type)
     {
         GetXZ(pos, out int x, out int z);
         objects.Add(new Vector2Int(x, z), type);
-
     }
 
     public void TempBuild(int x, int z)
@@ -71,12 +70,12 @@ public class GridMap
         objects.Add(new Vector2Int(x, z), 1);
     }
 
-    public void UndoBuild(int x, int z)
+    public void RemoveBuild(int x, int z)
     {
         objects.Remove(new Vector2Int(x, z));
     }
 
-    public void RemoveObjects(params Vector3[] objects)
+    public void RemoveObjects(Vector3[] objects)
     {
         for (int i = 0; i < objects.Length; i++)
         {

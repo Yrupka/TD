@@ -1,22 +1,32 @@
 {
     "Items": [
         {
-            "name": "poison_1",
-            "attack": 0,
-            "range": 400,
-            "attackSpeed": 1.0,
-            "magic": true,
-            "poison": 4,
-            "splash": 0
+            "name": "Armor",
+            "attack": 2,
+            "range": 3.3,
+            "attackSpeed": 340,
+            "magic": 0,
+            "poison": 0,
+            "targets": 1
         },
         {
-            "name": "poison_2",
-            "attack": 0,
-            "range": 400,
-            "attackSpeed": 0.8,
-            "magic": true,
-            "poison": 8,
-            "splash": 0
+            "name": "Poison",
+            "attack": 2,
+            "range": 3.3,
+            "attackSpeed": 170,
+            "magic": 0,
+            "poison": 2,
+            "targets": 1
+        },
+        {
+            "name": "Swift",
+            "attack": 2,
+            "range": 3.3,
+            "attackSpeed": 515,
+            "magic": 0,
+            "poison": 0,
+            "targets": 1
         }
+        
     ]
 }

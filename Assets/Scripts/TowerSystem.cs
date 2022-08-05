@@ -11,16 +11,27 @@ public class TowerSystem
         public int attack;
         public int range;
         public float attackSpeed;
-        public bool magic;
+        public int magic;
         public int poison;
         public int splash;
     }
 
+    [System.Serializable]
+    private class AllTowerCombination
+    {
+        public string tower1;
+        public string tower2;
+        public string tower3;
+        public string result;
+    }
+
     private List<Tower> towers;
-    private List<int> upgradeNumbers;
+    private List<Tower> newPlacedTowers;
+    private List<
     // массивы текстур, моделей, параметров вышек
     private AllTowerList[] allTowerStats;
     private Transform[] allTowerModels;
+    private AllTowerCombination[] allTowerCombination;
     private Dictionary<string, Texture2D> textures;
 
     public static Action<Vector3[]> makeRocks;
@@ -28,71 +39,89 @@ public class TowerSystem
     public TowerSystem()
     {
         towers = new List<Tower>();
-        upgradeNumbers = new List<int>();
+        newPlacedTowers = new List<Tower>();
 
         var images = Resources.LoadAll<Texture2D>("Thumbnails");
         textures = new Dictionary<string, Texture2D>();
         foreach (var item in images)
             textures.Add(item.name, item);
 
-        var text = Resources.Load<TextAsset>("towersInfo");
-        allTowerStats = JsonHelper.FromJson<AllTowerList>(text.text);
+        var info = Resources.Load<TextAsset>("towersInfo");
+        allTowerStats = JsonHelper.FromJson<AllTowerList>(info.text);
         allTowerModels = Resources.LoadAll<Transform>("Towers");
+        var combination = Resources.Load<TextAsset>("towersCombination");
+        allTowerCombination = JsonHelper.FromJson<AllTowerCombination>(combination.text);
     }
 
     public Transform Create(Vector3 pos)
     {
-        int towerNumber = UnityEngine.Random.Range(0, 2); // тип вышки
+        int towerNumber = UnityEngine.Random.Range(0, allTowerStats.Length); // тип вышки
         int towerLevel = UnityEngine.Random.Range(1, 6); // уровень от 1 до 5
         Tower tower = MakeTower(pos, towerNumber, towerLevel);
-
-        upgradeNumbers.Add(towerNumber);
-
-        tower.Upgrades = new Texture2D[] { textures[tower.Name] };
-        tower.upgraded += CheckTowers;
+        // можно создать 5 вышек за раз
+        newPlacedTowers.Add(tower);
         towers.Add(tower);
-        
+
         return tower.transform;
     }
 
     private Tower MakeTower(Vector3 pos, int towerNumber, int level)
     {
-        Tower tower = Tower.Create(allTowerModels[towerNumber], pos).GetComponent<Tower>();
-        tower.SetStats(allTowerStats[towerNumber].name, allTowerStats[towerNumber].attack, level,
-            allTowerStats[towerNumber].range, allTowerStats[towerNumber].attackSpeed,
+        Tower tower = Tower.Create(allTowerModels[towerNumber], pos, level).GetComponent<Tower>();
+        tower.SetStats(allTowerStats[towerNumber].name, level,
+            allTowerStats[towerNumber].attack * level, allTowerStats[towerNumber].range,
+            allTowerStats[towerNumber].attackSpeed,
             allTowerStats[towerNumber].poison, allTowerStats[towerNumber].magic);
         return tower;
     }
 
-    private void CheckUpgrage()
+    // проверка массива вышек на возможные комбинации
+    // UpgradeNumber = -2 - только создана, -1 - нет комбинации, номер - номер улучшения из списка
+    private Texture2D[] CheckUpgrage(List<Tower> towers)
     {
-
+        Texture2D[] textures;
+        foreach (var tower in towers)
+        {
+            
+        }
+        return textures;
     }
 
-    public void CheckTowers()
+    // для 5 созданных вышек возможно выбрать 1, которая останется,
+    // также возможно собрать комбинаницию из 3 вышек, тогда также останется 1 улучшенная вышка
+    public void CheckNewTowers()
+    {
+        
+        // for (int i = 0, j = 0; i < towers.Count; i++, j++)
+        // {
+        //     Debug.Log(towers[i].UpgradeNumber);
+        //     if (towers[i].UpgradeNumber == -2)
+        //         continue;
+        //     if (towers[i].UpgradeNumber == -1)
+        //     {
+        //         rocks.Add(towers[i].transform.position);
+        //         GameObject.Destroy(towers[i].gameObject);
+        //         towers.Remove(towers[i]);
+        //         i--;
+        //     }
+        //     else
+        //     {
+        //         int level = towers[i].Level;
+        //         Tower tower = MakeTower(towers[i].transform.position, towers[i].UpgradeNumber, level);
+        //         GameObject.Destroy(towers[i].gameObject);
+        //         towers.Remove(towers[i]);
+        //         towers.Add(tower);
+        //         i++;
+        //     }
+        // }
+        
+    }
+
+    // Оставить одну, выбранную вышку, удалить остальные, имеющие возможность улучшения
+    public void ChooseOne()
     {
         // массив удаляемых вышек
         List<Vector3> rocks = new List<Vector3>();
-        for (int i = 0, j = 0; i < towers.Count; i++, j++)
-        {
-            if (towers[i].UpgradeNumber == -2)
-                continue;
-            if (towers[i].UpgradeNumber == -1)
-            {
-                rocks.Add(towers[i].transform.position);
-                GameObject.Destroy(towers[i].gameObject);
-                towers.Remove(towers[i]);
-                i--;
-            }
-            else
-            {
-                int level = towers[i].Level;
-                Tower tower = MakeTower(towers[i].transform.position, upgradeNumbers[j], level);
-                GameObject.Destroy(towers[i].gameObject);
-                towers.Remove(towers[i]);
-                towers.Add(tower);
-            }
-        }
         makeRocks?.Invoke(rocks.ToArray());
     }
 }

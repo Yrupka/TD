@@ -1,0 +1,22 @@
+{
+    "Items": [
+        {
+            "tower1": "Frost 1",
+            "tower2": "Common 1",
+            "tower3": "Multi 1",
+            "result": "Silver"
+        },
+        {
+            "tower1": "Multi 2",
+            "tower2": "Multi 1",
+            "tower3": "Armor 1",
+            "result": "Ruby"
+        },
+        {
+            "tower1": "Swift 1",
+            "tower2": "Poison 1",
+            "tower3": "Speed 1",
+            "result": "Malachite"
+        }
+    ]
+}

@@ -1,10 +1,25 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class ObjectStats : MonoBehaviour
 {
+    [System.Serializable]
+    private class Translate
+    {
+        public string name;
+        public string rus;
+    }
+    private enum Character
+    {
+        tower,
+        rock,
+        enemy
+    }
     private Transform cameraTransform;
     private Transform currentCharacter;
+    private Dictionary<string, string> translates;
 
     // статы персонажа
     private new Text name;
@@ -16,11 +31,13 @@ public class ObjectStats : MonoBehaviour
 
     // возможные улучшения вышки
     private Transform actions;
+    private TextMeshProUGUI levelText;
 
     // эффекты вышки
     private Transform magic;
     private Transform poison;
 
+    // Костыль, не видит raycast'ом UI, за ним находится щит, чтобы тыкать и оно не закрывалось
     [SerializeField] Transform shield;
 
     private void Start()
@@ -35,8 +52,16 @@ public class ObjectStats : MonoBehaviour
         poison = transform.Find("Effects").Find("Poison");
 
         actions = transform.Find("Actions").Find("Values");
+        levelText = actions.Find("A1").Find("Level").GetComponent<TextMeshProUGUI>();
 
         cameraTransform = transform.Find("Image").Find("Camera");
+
+        translates = new Dictionary<string, string>();
+        var text = Resources.Load<TextAsset>("towersName");
+        Translate[] items = JsonHelper.FromJson<Translate>(text.text);
+        foreach (var item in items)
+            translates.Add(item.name, item.rus);
+
         Hide();
     }
 
@@ -47,24 +72,15 @@ public class ObjectStats : MonoBehaviour
 
     public void Show(Transform character)
     {
-        string tName = "";
-        int tHealth = 0;
-        int tArmor = 0;
-        int tAttack = 0;
-        int tRange = 0;
-        float tAttackSpeed = 0f;
-        int tPoison = 0;
-        bool tMagic = false;
-
         switch (character.gameObject.layer)
         {
             case 11:
-                tName = "Камень";
+                SetStats(null, Character.rock);
                 break;
             case 10:
-                character.parent.GetComponent<Tower>().GetStats(
-                    out tName, out tAttack, out tRange, out tAttackSpeed, out tPoison, out tMagic);
-                SetActions(character.parent.GetComponent<Tower>());
+                Tower tower = character.parent.GetComponent<Tower>();
+                SetStats(tower, Character.tower);
+                SetActions(tower);
                 break;
             case 9:
                 Hide();
@@ -72,8 +88,6 @@ public class ObjectStats : MonoBehaviour
             default:
                 return;
         }
-
-        SetStats(tName, tHealth, tArmor, tAttack, tRange, tAttackSpeed, tPoison, tMagic);
 
         currentCharacter = character;
         gameObject.SetActive(true);
@@ -92,6 +106,12 @@ public class ObjectStats : MonoBehaviour
 
         for (int i = 0; i < tower.Upgrades.Length; i++)
         {
+            if (tower.Level != 0)
+            {
+                levelText.text = tower.Level.ToString();
+                levelText.gameObject.SetActive(true);
+            }
+
             Transform action = actions.Find($"A{i + 1}");
             action.gameObject.SetActive(true);
             action.GetComponent<RawImage>().texture = tower.Upgrades[i];
@@ -106,9 +126,36 @@ public class ObjectStats : MonoBehaviour
     {
         actions.gameObject.SetActive(value);
     }
-    private void SetStats(string tName, int tHealth, int tArmor, int tAttack, int tRange, float tAttackSpeed, int tPoison, bool tMagic)
+    private void SetStats(ICharacter character, Character type)
     {
-        name.text = tName;
+        string tName = "";
+        int tHealth = 0;
+        int tAttack = 0;
+        float tAttackSpeed = 0;
+        int tRange = 0;
+        int tArmor = 0;
+        int tPoison = 0;
+        int tMagic = 0;
+
+        switch (type)
+        {
+            case Character.tower:
+            Tower tower = character as Tower;
+            tName = translates[tower.Name].ToString() + " " + tower.Level.ToString();
+            tAttack = tower.Attack;
+            tAttackSpeed = tower.AttackSpeed;
+            tRange = tower.Range;
+            tPoison = tower.Poison;
+            tMagic = tower.Magic;
+            break;
+            case Character.rock:
+            tName = "Камень";
+            break;
+            case Character.enemy:
+            break;
+        }
+
+        name.text = tName; 
 
         if (tHealth == 0)
             health.text = "Неуязвимость";
@@ -141,6 +188,13 @@ public class ObjectStats : MonoBehaviour
         {
             poison.Find("Value").GetComponent<Text>().text = tPoison.ToString();
             poison.gameObject.SetActive(true);
+        }
+        if (tMagic == 0)
+            magic.gameObject.SetActive(false);
+        else
+        {
+            magic.Find("Value").GetComponent<Text>().text = tPoison.ToString();
+            magic.gameObject.SetActive(true);
         }
     }
 }

@@ -39,7 +39,7 @@ public class Pathfind
     public Pathfind(GridMap grid)
     {
         gridMap = grid;
-        this.grid = new Node[grid.GetWidth(), grid.GetHeight()];
+        this.grid = new Node[grid.Width, grid.Height];
     }
 
     public List<Vector3> FindPath(Vector3Int start, Vector3Int end)
@@ -66,9 +66,9 @@ public class Pathfind
         openList = new List<Node>();
         closeList = new HashSet<Node>();
 
-        for (int x = 0; x < gridMap.GetWidth(); x++)
+        for (int x = 0; x < gridMap.Width; x++)
         {
-            for (int y = 0; y < gridMap.GetHeight(); y++)
+            for (int y = 0; y < gridMap.Height; y++)
             {
                 Node node = new Node(x, y);
                 node.isWalkable = gridMap.CanWalk(x, y);
@@ -138,8 +138,8 @@ public class Pathfind
                 if (xOffset == 0 && yOffset == 0)
                     continue;
                 // выход за границе по одной из координат
-                if ((current.x + xOffset < 0 || current.x + xOffset > gridMap.GetWidth()) ||
-                    (current.y + yOffset < 0 || current.y + yOffset > gridMap.GetHeight()))
+                if ((current.x + xOffset < 0 || current.x + xOffset > gridMap.Width) ||
+                    (current.y + yOffset < 0 || current.y + yOffset > gridMap.Height))
                     continue;
                 neighbors.Add(grid[current.x + xOffset, current.y + yOffset]);
             }

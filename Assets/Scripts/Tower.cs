@@ -1,14 +1,19 @@
 ﻿using UnityEngine;
 using System;
 
-public class Tower : MonoBehaviour
+public class Tower : MonoBehaviour, ICharacter
 {
     // --- Создание вышки ---
     private int attack; // размер атаки
+    public int Attack { get { return attack; } }
     private int range; // дальность атаки
+    public int Range { get { return range; } }
     private float attackSpeed; // скорость атак
+    public float AttackSpeed { get { return attackSpeed; } }
     private int poison; // количество урона от яда, если есть
-    private bool magic; // вышка магического типа?
+    public int Poison { get { return poison; } }
+    private int magic; // вышка магического типа?
+    public int Magic { get { return magic; } }
     private int level; // уровень вышки (базовых типов)
     public int Level { get { return level; } }
     private new string name;
@@ -17,11 +22,7 @@ public class Tower : MonoBehaviour
     public Texture2D[] Upgrades
     {
         get { return upgrades; }
-        set
-        {
-            upgrades = value;
-            upgradeNumber = upgrades == null ? -2 : -1;
-        }
+        set{ upgrades = value; }
     }
     private int upgradeNumber;
     public int UpgradeNumber
@@ -37,16 +38,21 @@ public class Tower : MonoBehaviour
 
     public Action upgraded;
 
-    public static Transform Create(Transform model, Vector3 pos)
+    public static Transform Create(Transform model, Vector3 pos, int level)
     {
         Transform created = Instantiate(model, pos, Quaternion.identity);
+        created.Find("Visual").localScale += Vector3.one * level / 10f;
+        created.Find("Visual").localPosition = Vector3.one * 0.5f;
         return created;
     }
 
-    public void SetStats(string name, int level, int attack, int range, float attackSpeed, int poison, bool magic)
+    public void SetStats(string name, int level, int attack, int range, float attackSpeed, int poison, int magic)
     {
         upgrades = new Texture2D[3];
-        upgradeNumber = -2;
+        if (level != 0)
+            upgradeNumber = -2;
+        else
+            upgradeNumber = -1;
 
         this.name = name;
         this.level = level;
@@ -55,16 +61,6 @@ public class Tower : MonoBehaviour
         this.attackSpeed = attackSpeed;
         this.poison = poison;
         this.magic = magic;
-    }
-
-    public void GetStats(out string name, out int attack, out int range, out float attackSpeed, out int poison, out bool magic)
-    {
-        name = this.name;
-        attack = this.attack;
-        range = this.range;
-        attackSpeed = this.attackSpeed;
-        poison = this.poison;
-        magic = this.magic;
     }
 
     // --- Атака вышки ---
