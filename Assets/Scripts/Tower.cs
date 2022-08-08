@@ -18,25 +18,21 @@ public class Tower : MonoBehaviour, ICharacter
     public int Level { get { return level; } }
     private new string name;
     public string Name { get { return name; } }
-    private Texture2D[] upgrades;
-    public Texture2D[] Upgrades
-    {
-        get { return upgrades; }
-        set{ upgrades = value; }
-    }
-    private int upgradeNumber;
-    public int UpgradeNumber
-    {
-        get { return upgradeNumber; }
-        set
-        {
-            upgradeNumber = value;
-            upgraded?.Invoke();
-        }
-    }
+    public Texture2D[] upgrades;
+    public int[] upgradesNum;
+
     private float shootTimer;
 
-    public Action upgraded;
+    // обновилась конкретная вышка, номер отражает номер выбранного варианта улучшения
+    public Action<Tower> upgraded;
+
+    public bool NameLevel(Tower obj)
+    {
+        if (this.Name == obj.Name && this.Level == obj.Level)
+            return true;
+        else
+            return false;
+    }
 
     public static Transform Create(Transform model, Vector3 pos, int level)
     {
@@ -48,11 +44,8 @@ public class Tower : MonoBehaviour, ICharacter
 
     public void SetStats(string name, int level, int attack, int range, float attackSpeed, int poison, int magic)
     {
-        upgrades = new Texture2D[3];
-        if (level != 0)
-            upgradeNumber = -2;
-        else
-            upgradeNumber = -1;
+        upgrades = null;
+        upgradesNum = null;
 
         this.name = name;
         this.level = level;

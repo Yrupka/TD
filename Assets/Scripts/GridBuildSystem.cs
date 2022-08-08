@@ -15,14 +15,12 @@ public class GridBuildSystem : MonoBehaviour
     private Vector3Int[] pointsPos;
     private List<Vector3> path;
 
-    private int mana = 5;
+    private int mana;
     public static Action<int> onManaChange;
 
-    private void Start()
+    public void Init(int mana, int height, int width)
     {
-        int height = 37;
-        int width = 37;
-
+        this.mana = mana;
         rock = Resources.Load<Transform>("Prefabs/Rock");
         point = Resources.Load<Transform>("Prefabs/Point");
 
@@ -80,11 +78,7 @@ public class GridBuildSystem : MonoBehaviour
     private void BuildTower(Vector3 globalPos)
     {
         if (mana == 0)
-        {
-            towerSystem.CheckNewTowers();
             return;
-        }
-            
         // 0 - пусто, 1 - камень, 2 - башня, 3 - точка
         int gridObject = grid.CanBuild(globalPos);
         grid.GetXZ(globalPos, out int x, out int z);
@@ -113,6 +107,8 @@ public class GridBuildSystem : MonoBehaviour
                 PopUpDialog.Create(globalPos, "Тут нельзя строить!");
                 break;
         }
+        if (mana == 0)
+            towerSystem.CheckNewTowers();
     }
 
     public void UpdateGrid(Vector3[] towers)

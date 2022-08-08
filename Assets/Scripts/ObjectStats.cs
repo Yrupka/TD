@@ -22,12 +22,8 @@ public class ObjectStats : MonoBehaviour
     private Dictionary<string, string> translates;
 
     // статы персонажа
-    private new Text name;
-    private Text health;
-    private Text attack;
-    private Text range;
-    private Text attackSpeed;
-    private Text armor;
+    private TextMeshProUGUI[] fields;
+    private string[] fieldsText;
 
     // возможные улучшения вышки
     private Transform actions;
@@ -42,12 +38,14 @@ public class ObjectStats : MonoBehaviour
 
     private void Start()
     {
-        name = transform.Find("Name").Find("Value").GetComponent<Text>();
-        health = transform.Find("Health").Find("Value").GetComponent<Text>();
-        attack = transform.Find("Stats").Find("Attack").GetComponent<Text>();
-        range = transform.Find("Stats").Find("Range").GetComponent<Text>();
-        attackSpeed = transform.Find("Stats").Find("AttackSpeed").GetComponent<Text>();
-        armor = transform.Find("Stats").Find("Armor").GetComponent<Text>();
+        fields = new TextMeshProUGUI[6];
+        fieldsText = new string[5] {"Неуязвимость:", "Атака:", "Радиус атаки:", "Cкорость атаки:", "Защита:" };
+        fields[0] = transform.Find("Name").Find("Value").GetComponent<TextMeshProUGUI>();
+        fields[1] = transform.Find("Health").Find("Value").GetComponent<TextMeshProUGUI>();
+        fields[2] = transform.Find("Stats").Find("Attack").GetComponent<TextMeshProUGUI>();
+        fields[3] = transform.Find("Stats").Find("Range").GetComponent<TextMeshProUGUI>();
+        fields[4] = transform.Find("Stats").Find("AttackSpeed").GetComponent<TextMeshProUGUI>();
+        fields[5] = transform.Find("Stats").Find("Armor").GetComponent<TextMeshProUGUI>();
         magic = transform.Find("Effects").Find("Magic");
         poison = transform.Find("Effects").Find("Poison");
 
@@ -101,11 +99,12 @@ public class ObjectStats : MonoBehaviour
 
     private void SetActions(Tower tower)
     {
-        if (tower == null)
+        if (tower.upgrades == null)
             return;
-
-        for (int i = 0; i < tower.Upgrades.Length; i++)
+        for (int i = 0; i < tower.upgrades.Length; i++)
         {
+            if (tower.upgrades[i] == null)
+                break;
             if (tower.Level != 0)
             {
                 levelText.text = tower.Level.ToString();
@@ -114,12 +113,20 @@ public class ObjectStats : MonoBehaviour
 
             Transform action = actions.Find($"A{i + 1}");
             action.gameObject.SetActive(true);
-            action.GetComponent<RawImage>().texture = tower.Upgrades[i];
+            action.GetComponent<RawImage>().texture = tower.upgrades[i];
             action.GetComponent<Button>().onClick.RemoveAllListeners();
-            action.GetComponent<Button>().onClick.AddListener(
-                () => { tower.UpgradeNumber = i; Hide(); ActionsVisibility(false); });
+            action.GetComponent<Button>().onClick.AddListener(() => TowerPicked(tower, action.name));
         }
 
+    }
+
+    private void TowerPicked(Tower tower, string name)
+    {
+        int slotNum = int.Parse(name.Substring(1)) - 1;
+        tower.upgradesNum[0] = tower.upgradesNum[slotNum];
+        tower.upgraded?.Invoke(tower); 
+        Hide();
+        ActionsVisibility(false);
     }
 
     public void ActionsVisibility(bool value)
@@ -155,10 +162,14 @@ public class ObjectStats : MonoBehaviour
             break;
         }
 
-        name.text = tName; 
+        fields[0].SetText(tName);
 
+        for (int i = 0; i < 5; i++)
+        {
+            FieldControl(i, fieldsText[i]);
+        }
         if (tHealth == 0)
-            health.text = "Неуязвимость";
+            health.text = ;
         else
             health.text = tHealth.ToString();
 
@@ -195,6 +206,16 @@ public class ObjectStats : MonoBehaviour
         {
             magic.Find("Value").GetComponent<Text>().text = tPoison.ToString();
             magic.gameObject.SetActive(true);
+        }
+    }
+    private void FieldControl(int num, string text)
+    {
+        if (text == "")
+            fields[num].gameObject.SetActive(false);
+        else
+        {
+            fields[num].gameObject.SetActive(true);
+            fields[num].text = text;
         }
     }
 }

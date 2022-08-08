@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Main : MonoBehaviour
 {    
@@ -11,10 +8,12 @@ public class Main : MonoBehaviour
     [SerializeField] private LevelSystem levelSystem;
     
     private int health = 100;
+    private int mana = 5;
 
     
     void Start()
     {
+        gridBuildSystem.Init(mana, 37, 37);
         GridBuildSystem.onManaChange += ChangeMana;
         MainCamera.selected += objectStats.Show;
         TowerSystem.makeRocks += gridBuildSystem.UpdateGrid;
