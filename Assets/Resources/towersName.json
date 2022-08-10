@@ -1,6 +1,10 @@
 {
     "Items": [
         {
+            "name": "Armor",
+            "rus": "Броня" 
+        },
+        {
             "name": "Poison",
             "rus": "Яд" 
         },
@@ -13,8 +17,20 @@
             "rus": "Быстрая" 
         },
         {
-            "name": "Armor",
-            "rus": "Броня" 
+            "name": "Common",
+            "rus": "Обычная" 
+        },
+        {
+            "name": "Vision",
+            "rus": "Зрение" 
+        },
+        {
+            "name": "Splash",
+            "rus": "Сплеш" 
+        },
+        {
+            "name": "Multi",
+            "rus": "Мультишот" 
         }
     ]
 }

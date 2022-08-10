@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,25 +11,27 @@ public class ObjectStats : MonoBehaviour
         public string name;
         public string rus;
     }
-    private enum Character
+    private enum Effects
     {
-        tower,
-        rock,
-        enemy
+        magic,
+        poison
     }
     private Transform cameraTransform;
     private Transform currentCharacter;
     private Dictionary<string, string> translates;
 
-    // статы персонажа
-    private TextMeshProUGUI[] fields;
-    private string[] fieldsText;
+    // статы персонажей
+    private TextMeshProUGUI[] fieldsEnemy;
+    private TextMeshProUGUI[] fieldsTower;
+    private string[] fieldsTextEnemy;
+    private string[] fieldsTextTower;
 
     // возможные улучшения вышки
     private Transform actions;
     private TextMeshProUGUI levelText;
 
     // эффекты вышки
+    private Transform effects;
     private Transform magic;
     private Transform poison;
 
@@ -38,16 +40,24 @@ public class ObjectStats : MonoBehaviour
 
     private void Start()
     {
-        fields = new TextMeshProUGUI[6];
-        fieldsText = new string[5] {"Неуязвимость:", "Атака:", "Радиус атаки:", "Cкорость атаки:", "Защита:" };
-        fields[0] = transform.Find("Name").Find("Value").GetComponent<TextMeshProUGUI>();
-        fields[1] = transform.Find("Health").Find("Value").GetComponent<TextMeshProUGUI>();
-        fields[2] = transform.Find("Stats").Find("Attack").GetComponent<TextMeshProUGUI>();
-        fields[3] = transform.Find("Stats").Find("Range").GetComponent<TextMeshProUGUI>();
-        fields[4] = transform.Find("Stats").Find("AttackSpeed").GetComponent<TextMeshProUGUI>();
-        fields[5] = transform.Find("Stats").Find("Armor").GetComponent<TextMeshProUGUI>();
-        magic = transform.Find("Effects").Find("Magic");
-        poison = transform.Find("Effects").Find("Poison");
+        fieldsTextEnemy = new string[2] { "Защита: ", "Скорость: " };
+        fieldsTextTower = new string[3] { "Атака: ", "Cкорость атаки: ", "Радиус атаки: " };
+
+        Transform stats = transform.Find("Stats");
+        fieldsEnemy = new TextMeshProUGUI[4];
+        fieldsEnemy[0] = transform.Find("Name").Find("Value").GetComponent<TextMeshProUGUI>();
+        fieldsEnemy[1] = transform.Find("Health").Find("Value").GetComponent<TextMeshProUGUI>();
+        fieldsEnemy[2] = stats.Find("Enemy").Find("Speed").GetComponent<TextMeshProUGUI>();
+        fieldsEnemy[3] = stats.Find("Enemy").Find("Armor").GetComponent<TextMeshProUGUI>();
+        fieldsTower = new TextMeshProUGUI[4];
+        fieldsTower[0] = transform.Find("Name").Find("Value").GetComponent<TextMeshProUGUI>();
+        fieldsTower[1] = stats.Find("Tower").Find("Attack").GetComponent<TextMeshProUGUI>();
+        fieldsTower[2] = stats.Find("Tower").Find("AttackSpeed").GetComponent<TextMeshProUGUI>();
+        fieldsTower[3] = stats.Find("Tower").Find("Range").GetComponent<TextMeshProUGUI>();
+
+        effects = transform.Find("Effects").Find("Values");
+        magic = effects.Find("Magic");
+        poison = effects.Find("Poison");
 
         actions = transform.Find("Actions").Find("Values");
         levelText = actions.Find("A1").Find("Level").GetComponent<TextMeshProUGUI>();
@@ -60,7 +70,7 @@ public class ObjectStats : MonoBehaviour
         foreach (var item in items)
             translates.Add(item.name, item.rus);
 
-        Hide();
+        Visibility(false);
     }
 
     private void Update()
@@ -72,36 +82,45 @@ public class ObjectStats : MonoBehaviour
     {
         switch (character.gameObject.layer)
         {
+            case 12:
+                PickRock();
+                break;
             case 11:
-                SetStats(null, Character.rock);
+                Enemy enemy = character.parent.GetComponent<Enemy>();
+                PickEnemy(enemy);
+                PickTower(null);
                 break;
             case 10:
                 Tower tower = character.parent.GetComponent<Tower>();
-                SetStats(tower, Character.tower);
+                PickTower(tower);
+                PickEnemy(null);
                 SetActions(tower);
                 break;
             case 9:
-                Hide();
+                Visibility(false);
                 return;
             default:
                 return;
         }
-
         currentCharacter = character;
-        gameObject.SetActive(true);
-        shield.gameObject.SetActive(true);
+        Visibility(true);
     }
-    private void Hide()
+    private void Visibility(bool state)
     {
-        gameObject.SetActive(false);
-        shield.gameObject.SetActive(false);
+        gameObject.SetActive(state);
+        shield.gameObject.SetActive(state);
     }
 
     private void SetActions(Tower tower)
     {
         if (tower.upgrades == null)
+        {
+            for (int i = 1; i <= 3; i++)
+                actions.Find($"A{i}").gameObject.SetActive(false);
             return;
-        for (int i = 0; i < tower.upgrades.Length; i++)
+        }
+            
+        for (int i = 0; i < 3; i++)
         {
             if (tower.upgrades[i] == null)
                 break;
@@ -124,98 +143,91 @@ public class ObjectStats : MonoBehaviour
     {
         int slotNum = int.Parse(name.Substring(1)) - 1;
         tower.upgradesNum[0] = tower.upgradesNum[slotNum];
-        tower.upgraded?.Invoke(tower); 
-        Hide();
-        ActionsVisibility(false);
+        tower.upgraded?.Invoke(tower);
+        Visibility(false);
     }
 
-    public void ActionsVisibility(bool value)
+    public void TowerComponents(bool value)
     {
         actions.gameObject.SetActive(value);
+        effects.gameObject.SetActive(value);
     }
-    private void SetStats(ICharacter character, Character type)
+
+    private void PickTower(Tower tower)
     {
-        string tName = "";
-        int tHealth = 0;
-        int tAttack = 0;
-        float tAttackSpeed = 0;
-        int tRange = 0;
-        int tArmor = 0;
-        int tPoison = 0;
-        int tMagic = 0;
-
-        switch (type)
+        if (tower == null)
         {
-            case Character.tower:
-            Tower tower = character as Tower;
-            tName = translates[tower.Name].ToString() + " " + tower.Level.ToString();
-            tAttack = tower.Attack;
-            tAttackSpeed = tower.AttackSpeed;
-            tRange = tower.Range;
-            tPoison = tower.Poison;
-            tMagic = tower.Magic;
-            break;
-            case Character.rock:
-            tName = "Камень";
-            break;
-            case Character.enemy:
-            break;
+            fieldsTower[1].transform.parent.gameObject.SetActive(false);
+            TowerComponents(false);
+            return;
         }
 
-        fields[0].SetText(tName);
+        string name = tower.Name + " ";
+        if (tower.Level != 0)
+            name += tower.Level.ToString();
 
-        for (int i = 0; i < 5; i++)
-        {
-            FieldControl(i, fieldsText[i]);
-        }
-        if (tHealth == 0)
-            health.text = ;
-        else
-            health.text = tHealth.ToString();
+        fieldsTower[0].SetText(name);
+        fieldsTower[1].SetText(fieldsTextTower[0] + tower.Attack.ToString());
+        fieldsEnemy[1].SetText("Неуязвимость");
+        fieldsTower[2].SetText(fieldsTextTower[1] + tower.AttackSpeed.ToString());
+        fieldsTower[3].SetText(fieldsTextTower[2] + tower.Range.ToString());
 
-        if (tAttack == 0)
-            attack.gameObject.SetActive(false);
-        else
-            attack.text = $"Атака: {tAttack.ToString()}";
+        // включить отображение характеристик
+        fieldsTower[1].transform.parent.gameObject.SetActive(true);
 
-        if (tRange == 0)
-            range.gameObject.SetActive(false);
-        else
-            range.text = $"Радиус атаки: {tAttack.ToString()}";
-
-        if (tAttackSpeed == 0)
-            attackSpeed.gameObject.SetActive(false);
-        else
-            attackSpeed.text = $"Cкорость атаки: {tAttack.ToString()}";
-
-        if (tArmor == 0)
-            armor.gameObject.SetActive(false);
-        else
-            armor.text = $"Защита: {tArmor.ToString()}";
-
-        if (tPoison == 0)
-            poison.gameObject.SetActive(false);
-        else
-        {
-            poison.Find("Value").GetComponent<Text>().text = tPoison.ToString();
-            poison.gameObject.SetActive(true);
-        }
-        if (tMagic == 0)
-            magic.gameObject.SetActive(false);
-        else
-        {
-            magic.Find("Value").GetComponent<Text>().text = tPoison.ToString();
-            magic.gameObject.SetActive(true);
-        }
+        SetEffect(Effects.magic, tower.Magic);
+        SetEffect(Effects.poison, tower.Poison);
+        TowerComponents(true);
     }
-    private void FieldControl(int num, string text)
+
+    private void PickEnemy(Enemy enemy)
     {
-        if (text == "")
-            fields[num].gameObject.SetActive(false);
-        else
+        if (enemy == null)
         {
-            fields[num].gameObject.SetActive(true);
-            fields[num].text = text;
+            fieldsEnemy[2].transform.parent.gameObject.SetActive(false);
+            return;
+        }
+
+        fieldsEnemy[0].SetText(enemy.Name);
+        fieldsEnemy[1].SetText(enemy.CurrentHealth.ToString() + "/" + enemy.Health.ToString());
+        fieldsEnemy[2].SetText(fieldsTextEnemy[0] + enemy.Armor.ToString());
+        fieldsEnemy[3].SetText(fieldsTextEnemy[1] + enemy.Speed.ToString());
+        // включить отображение характеристик
+        fieldsEnemy[2].transform.parent.gameObject.SetActive(true);
+    }
+
+    private void PickRock()
+    {
+        fieldsEnemy[0].SetText("Камень");
+        fieldsEnemy[1].SetText("Неуязвимость");
+        PickEnemy(null);
+        PickTower(null);
+    }
+
+    private void SetEffect(Effects effect, int value)
+    {
+        switch (effect)
+        {
+            case Effects.magic:
+                if (value == 0)
+                {
+                    magic.gameObject.SetActive(false);
+                    break;
+                }
+                magic.Find("Value").GetComponent<Text>().text = value.ToString();
+                magic.gameObject.SetActive(true);
+                break;
+            case Effects.poison:
+                if (value == 0)
+                {
+                    poison.gameObject.SetActive(false);
+                    break;
+                }
+                poison.Find("Value").GetComponent<Text>().text = value.ToString();
+                poison.gameObject.SetActive(true);
+                break;
+            default:
+                return;
         }
     }
 }

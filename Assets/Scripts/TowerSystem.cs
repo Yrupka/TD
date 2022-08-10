@@ -45,14 +45,12 @@ public class TowerSystem
     private AllTowerCombination[] allTowerCombination;
     private Dictionary<string, Texture2D> textures;
 
-    private bool towersChecked;
     public static Action<Vector3[]> makeRocks;
 
     public TowerSystem()
     {
         towers = new List<Tower>();
         newPlacedTowers = new List<Tower>();
-        towersChecked = false;
 
         var images = Resources.LoadAll<Texture2D>("Thumbnails");
         textures = new Dictionary<string, Texture2D>();
@@ -148,32 +146,27 @@ public class TowerSystem
     // также возможно собрать комбинаницию из 3 вышек, тогда также останется 1 улучшенная вышка
     public void CheckNewTowers()
     {
-        if (!towersChecked)
+        CheckUpgrade(newPlacedTowers);
+
+        foreach (var item in newPlacedTowers)
         {
-            CheckUpgrade(newPlacedTowers);
-
-            foreach (var item in newPlacedTowers)
+            int emptySlot = 0;
+            if (item.upgrades == null)
             {
-                int emptySlot = 0;
-                if (item.upgrades == null)
-                {
-                    item.upgrades = new Texture2D[3];
-                    item.upgradesNum = new int[3];
-                }
-                else
-                {
-                    // если есть улучшения, то первый слот(индекс 0) точно будет занят, ищем пусто место среди оставшихся
-                    if (item.upgrades[1] == null)
-                        emptySlot = 1;
-                    else
-                        emptySlot = 2;
-                }
-                item.upgrades[emptySlot] = textures[item.Name];
-                item.upgradesNum[emptySlot] = -1;
+                item.upgrades = new Texture2D[3];
+                item.upgradesNum = new int[3];
             }
-            towersChecked = true;
+            else
+            {
+                // если есть улучшения, то первый слот(индекс 0) точно будет занят, ищем пусто место среди оставшихся
+                if (item.upgrades[1] == null)
+                    emptySlot = 1;
+                else
+                    emptySlot = 2;
+            }
+            item.upgrades[emptySlot] = textures[item.Name];
+            item.upgradesNum[emptySlot] = -1;
         }
-
     }
 
     // Оставить одну, выбранную вышку, удалить остальные, имеющие возможность улучшения
@@ -181,8 +174,10 @@ public class TowerSystem
     {
         if (tower.upgradesNum[0] == -1)
         {
-            tower.upgrades = null;
-            tower.upgradesNum = null;
+            int towerIndex = towers.IndexOf(tower);
+            towers[towerIndex].upgrades = null;
+            towers[towerIndex].upgradesNum = null;
+            
             newPlacedTowers.Remove(tower);
 
             newTowersDelete();
@@ -236,7 +231,6 @@ public class TowerSystem
     private void newTowersDelete()
     {
         List<Vector3> rocks = new List<Vector3>();
-        towersChecked = false;
         foreach (var tower in newPlacedTowers)
         {
             rocks.Add(tower.transform.position);

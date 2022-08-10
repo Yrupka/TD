@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 
-public class Tower : MonoBehaviour, ICharacter
+public class Tower : MonoBehaviour
 {
     // --- Создание вышки ---
     private int attack; // размер атаки
@@ -25,14 +25,6 @@ public class Tower : MonoBehaviour, ICharacter
 
     // обновилась конкретная вышка, номер отражает номер выбранного варианта улучшения
     public Action<Tower> upgraded;
-
-    public bool NameLevel(Tower obj)
-    {
-        if (this.Name == obj.Name && this.Level == obj.Level)
-            return true;
-        else
-            return false;
-    }
 
     public static Transform Create(Transform model, Vector3 pos, int level)
     {

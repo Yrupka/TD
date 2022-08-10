@@ -6,11 +6,17 @@ public class Enemy : MonoBehaviour
 {
     // --- Создание противника ---
     private new string name;
+    public string Name {get { return name; } }
     private int health; // количество здоровья
+    public int Health {get { return health; } }
     private int currHealth; // текущее количество здоровья
+    public int CurrentHealth {get { return currHealth; } }
     private int armor; // количество брони
+    public int Armor {get { return armor; } }
     private int magicArmor; // количество магической брони
+    public int MagicArmor {get { return magicArmor; } }
     private int speed; // скорость передвижения
+    public int Speed {get { return speed; } }
     private List<Vector3> path; // путь движения
     private int currentPoint = 0; // текущая точка на поле
 
