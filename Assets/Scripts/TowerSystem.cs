@@ -9,11 +9,11 @@ public class TowerSystem
     {
         public string name;
         public int attack;
-        public int range;
+        public float range;
         public float attackSpeed;
         public int magic;
         public int poison;
-        public int splash;
+        public int targets;
     }
 
     [System.Serializable]
@@ -41,7 +41,7 @@ public class TowerSystem
 
     // массивы текстур, моделей, параметров вышек
     private AllTowerList[] allTowerStats;
-    private Transform[] allTowerModels;
+    private Dictionary<string, Transform> allTowerModels;
     private AllTowerCombination[] allTowerCombination;
     private Dictionary<string, Texture2D> textures;
 
@@ -59,15 +59,18 @@ public class TowerSystem
 
         var info = Resources.Load<TextAsset>("towersInfo");
         allTowerStats = JsonHelper.FromJson<AllTowerList>(info.text);
-        allTowerModels = Resources.LoadAll<Transform>("Towers");
+        var models = Resources.LoadAll<Transform>("Towers");
+        allTowerModels = new Dictionary<string, Transform>();
+        foreach (var item in models)
+            allTowerModels.Add(item.name, item);
         var combination = Resources.Load<TextAsset>("towersCombination");
         allTowerCombination = JsonHelper.FromJson<AllTowerCombination>(combination.text);
     }
 
-    public Transform Create(Vector3 pos)
+    public Transform Create(Vector3 pos, int playerLevel)
     {
         int towerNumber = UnityEngine.Random.Range(0, allTowerStats.Length); // тип вышки
-        int towerLevel = UnityEngine.Random.Range(1, 6); // уровень от 1 до 5
+        int towerLevel = UnityEngine.Random.Range(1, playerLevel + 1); // уровень от 1 до текущего уровня (верхняя граница не включается)
         Tower tower = MakeTower(pos, towerNumber, towerLevel);
         // можно создать 5 вышек за раз
         tower.upgraded += ChooseOne;
@@ -79,11 +82,12 @@ public class TowerSystem
 
     private Tower MakeTower(Vector3 pos, int towerNumber, int level)
     {
-        Tower tower = Tower.Create(allTowerModels[towerNumber], pos, level).GetComponent<Tower>();
-        tower.SetStats(allTowerStats[towerNumber].name, level,
+        string towerName = allTowerStats[towerNumber].name;
+        Tower tower = Tower.Create(allTowerModels[towerName], pos, level).GetComponent<Tower>();
+        tower.SetStats(towerName, level,
             allTowerStats[towerNumber].attack * level, allTowerStats[towerNumber].range,
-            allTowerStats[towerNumber].attackSpeed,
-            allTowerStats[towerNumber].poison, allTowerStats[towerNumber].magic);
+            allTowerStats[towerNumber].attackSpeed, allTowerStats[towerNumber].poison,
+            allTowerStats[towerNumber].magic, allTowerStats[towerNumber].targets);
         return tower;
     }
 

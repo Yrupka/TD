@@ -86,7 +86,7 @@ public class ObjectStats : MonoBehaviour
                 PickRock();
                 break;
             case 11:
-                Enemy enemy = character.parent.GetComponent<Enemy>();
+                Enemy enemy = character.GetComponent<Enemy>();
                 PickEnemy(enemy);
                 PickTower(null);
                 break;
@@ -147,10 +147,9 @@ public class ObjectStats : MonoBehaviour
         Visibility(false);
     }
 
-    public void TowerComponents(bool value)
+    public void ActionsVisibility(bool value)
     {
         actions.gameObject.SetActive(value);
-        effects.gameObject.SetActive(value);
     }
 
     private void PickTower(Tower tower)
@@ -158,11 +157,11 @@ public class ObjectStats : MonoBehaviour
         if (tower == null)
         {
             fieldsTower[1].transform.parent.gameObject.SetActive(false);
-            TowerComponents(false);
+            ActionsVisibility(false);
             return;
         }
 
-        string name = tower.Name + " ";
+        string name = translates[tower.Name] + " ";
         if (tower.Level != 0)
             name += tower.Level.ToString();
 
@@ -177,7 +176,7 @@ public class ObjectStats : MonoBehaviour
 
         SetEffect(Effects.magic, tower.Magic);
         SetEffect(Effects.poison, tower.Poison);
-        TowerComponents(true);
+        effects.gameObject.SetActive(true);
     }
 
     private void PickEnemy(Enemy enemy)

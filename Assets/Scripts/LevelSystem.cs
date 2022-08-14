@@ -2,33 +2,57 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LevelSystem : MonoBehaviour
+public static class LevelSystem
 {
-    private EnemySystem enemySystem;
-    private int wavesAmount;
-    private int enemyCount;
-    private int waveNum;
+    // текущий уровень игрока
+    private static int playerLevel;
+    // количество опыта за противника
+    private static int expEnemy;
+    // количество опыта за босса
+    private static int expBoss;
+    // опыта до следующего уровня
+    private static int[] expLevelAmount;
+    // текущее количество опыта
+    private static int expCurrent;
 
-    public void Init()
+    public static void Init(int eEnemy, int eBoss)
     {
-        enemySystem = new EnemySystem();
-        wavesAmount = enemySystem.GetWavesNumber();
-        enemyCount = 10;
-        waveNum = 0;
+        playerLevel = 1;
+        expEnemy = eEnemy;
+        expBoss = eBoss;
+        expLevelAmount = new int[4] {250, 400, 550, 700};
     }
 
-    public void StartWave(List<Vector3> path)
+    private static void CheckExp()
     {
-        for (int i = 0; i < 10; i++)
+        if (playerLevel == 5)
+            return;
+        if (expCurrent >= expLevelAmount[playerLevel - 1])
         {
-            StartCoroutine(Spawn(path));
+            expCurrent -= expLevelAmount[playerLevel - 1];
+            playerLevel++;
         }
-        //waveNum++;
-    }
-    public IEnumerator Spawn(List<Vector3> path)
-    {
-        enemySystem.Spawn(waveNum, path);
-        yield return new WaitForSeconds(0.5f);
     }
 
+    public static void AddExpEnemy()
+    {
+        expCurrent += expEnemy;
+        CheckExp();
+    }
+
+    public static void AddExpBoss()
+    {
+        expCurrent += expBoss;
+        CheckExp();
+    }
+
+    public static int GetCurrentLevel()
+    {
+        return playerLevel;
+    }
+    
+    public static int[,] GetCurrentExp()
+    {
+        return new int[expCurrent, expLevelAmount[playerLevel - 1]];
+    }
 }

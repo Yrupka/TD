@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,7 +16,9 @@ public class EnemySystem
 
     private static List<Enemy> enemies;
     private AllEnemyList[] allEnemyStats;
-    private Transform[] allEnemyModels;
+    private Dictionary<string, Transform> allEnemyModels;
+
+    public Action allDead;
 
     public EnemySystem()
     {
@@ -24,38 +27,40 @@ public class EnemySystem
         var text = Resources.Load<TextAsset>("enemiesInfo");
         allEnemyStats = JsonHelper.FromJson<AllEnemyList>(text.text);
 
-        allEnemyModels = Resources.LoadAll<Transform>("Enemies");
+        var models = Resources.LoadAll<Transform>("Enemies");
+        allEnemyModels = new Dictionary<string, Transform>();
+        foreach (var item in models)
+            allEnemyModels.Add(item.name, item);
     }
 
-    public void Spawn(int enemyNumber, List<Vector3> path)
+    public void Spawn(int waveNumber, List<Vector3> path)
     {
-        Enemy enemy = Enemy.Create(allEnemyModels[enemyNumber]).GetComponent<Enemy>();
-        string newEnemyName = allEnemyStats[enemyNumber].name;
-        enemy.SetStats(newEnemyName, allEnemyStats[enemyNumber].health,
-            allEnemyStats[enemyNumber].armor, allEnemyStats[enemyNumber].magicArmor,
-            allEnemyStats[enemyNumber].speed);
+        string enemyName = allEnemyStats[waveNumber].name;
+        Enemy enemy = Enemy.Create(allEnemyModels[enemyName]).GetComponent<Enemy>();
+
+        enemy.SetStats(enemyName, allEnemyStats[waveNumber].health,
+            allEnemyStats[waveNumber].armor, allEnemyStats[waveNumber].magicArmor,
+            allEnemyStats[waveNumber].speed);
         enemy.SetPath(path);
+        enemy.isDead += EnemyDead;
         enemies.Add(enemy);
     }
 
-    public static Enemy GetClosest(Vector3 position, int range)
+    private void EnemyDead()
     {
-        Enemy closest = null;
-        foreach (Enemy enemy in enemies)
+        LevelSystem.AddExpEnemy();
+        if (AllDead())
+            allDead?.Invoke();
+    }
+    
+    private bool AllDead()
+    {
+        foreach (var enemy in enemies)
         {
-            if (enemy.IsDead()) continue;
-            if (Vector3.Distance(position, enemy.GetPosition()) <= range)
-            {
-                if (closest == null)
-                    closest = enemy;
-                else
-                    if (Vector3.Distance(position, enemy.GetPosition()) <
-                        Vector3.Distance(position, closest.GetPosition()))
-                    closest = enemy;
-            }
-
+            if (!enemy.IsDead())
+                return false;
         }
-        return closest;
+        return true;
     }
 
     public int GetWavesNumber()

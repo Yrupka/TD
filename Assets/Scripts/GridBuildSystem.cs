@@ -40,6 +40,11 @@ public class GridBuildSystem : MonoBehaviour
         towerSystem = new TowerSystem();
     }
 
+    public void Refresh(int mana)
+    {
+        this.mana = mana;
+    }
+
     private void Update()
     {
         if (Input.GetMouseButtonDown(1))
@@ -90,7 +95,7 @@ public class GridBuildSystem : MonoBehaviour
                 if (UpdatePath(x, z))
                 {
                     onManaChange?.Invoke(--mana);
-                    towerSystem.Create(grid.GetWorldPos(x, z));
+                    towerSystem.Create(grid.GetWorldPos(x, z), LevelSystem.GetCurrentLevel());
                     grid.RemoveBuild(x, z);
                     grid.BuildObject(globalPos, 2);
                 }
@@ -99,7 +104,7 @@ public class GridBuildSystem : MonoBehaviour
                 break;
             case 1:
                 onManaChange?.Invoke(--mana);
-                towerSystem.Create(grid.GetWorldPos(x, z));
+                towerSystem.Create(grid.GetWorldPos(x, z), LevelSystem.GetCurrentLevel());
                 grid.RemoveBuild(x, z);
                 grid.BuildObject(globalPos, 2);
                 break;

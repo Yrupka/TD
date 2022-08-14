@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,6 +22,7 @@ public class Enemy : MonoBehaviour
     private int currentPoint = 0; // текущая точка на поле
 
     private Slider healthBar;
+    public Action isDead;
 
     public static Transform Create(Transform enemy)
     {
@@ -39,16 +41,7 @@ public class Enemy : MonoBehaviour
         this.currHealth = health;
         this.armor = armor;
         this.magicArmor = magicArmor;
-        this.speed = speed / 20;
-    }
-
-    public void GetStats(out string name, out int health, out int armor, out int magicArmor, out int speed)
-    {
-        name = this.name;
-        health = this.health;
-        armor = this.armor;
-        magicArmor = this.magicArmor;
-        speed = this.speed;
+        this.speed = speed;
     }
 
     public bool IsDead()
@@ -66,7 +59,11 @@ public class Enemy : MonoBehaviour
         healthBar.value = currHealth;
 
         if (IsDead())
+        {
+            isDead?.Invoke();
             Destroy(gameObject);
+        }
+            
     }
 
     public Vector3 GetPosition()
@@ -94,7 +91,7 @@ public class Enemy : MonoBehaviour
                 Vector3 moveDir = (target - transform.position).normalized;
                 float distanseBefore = Vector3.Distance(transform.position, target);
                 // todo animation start
-                transform.position = transform.position + moveDir * speed * Time.deltaTime;
+                transform.position = transform.position + moveDir * (speed / 100f) * Time.deltaTime;
             }
             else
             {
