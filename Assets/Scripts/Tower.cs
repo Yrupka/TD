@@ -63,7 +63,7 @@ public class Tower : MonoBehaviour
 
         if (shootTimer <= 0f)
         {
-            shootTimer = AttackSpeed;
+            shootTimer = 0f;
             Collider[] colliders = Physics.OverlapSphere(transform.position, Range);
             for (int i = 0, k = 0; i < colliders.Length && k < targets; i++)
             {
@@ -72,9 +72,9 @@ public class Tower : MonoBehaviour
                     Bullet.Create(shootPoint.position, enemy.GetPosition());
                     enemy.Damage(attack);
                     k++;
+                    shootTimer = AttackSpeed;
                 }
             }
-
         }
     }
 }

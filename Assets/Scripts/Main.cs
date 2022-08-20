@@ -1,28 +1,37 @@
 ﻿using UnityEngine;
 
 public class Main : MonoBehaviour
-{    
+{
     [SerializeField] private UIInterface mInterface;
     [SerializeField] private GridBuildSystem gridBuildSystem;
     [SerializeField] private ObjectStats objectStats;
     [SerializeField] private WaveSystem waveSystem;
-    
+    [SerializeField] private MainCamera mainCamera;
+    private PlayerLevel playerLevel;
+
     private int health = 100;
-    private int enemies = 10;
     private int mana = 5;
 
-    
+
     void Start()
     {
-        gridBuildSystem.Init(mana, 37, 37);
-        GridBuildSystem.onManaChange += ChangeMana;
-        MainCamera.selected += objectStats.Show;
+        gridBuildSystem.Init(mana, 1, 37, 37);
+        gridBuildSystem.onManaChange += ChangeMana;
+
+        mainCamera.Init(37, 37);
+        mainCamera.selected += objectStats.Show;
+        
         TowerSystem.makeRocks += gridBuildSystem.UpdateGrid;
-        UIInterface.onStart += StartWave;
+        mInterface.onStart += StartWave;
+        
+
         mInterface.Init(mana, health);
-        waveSystem.Init(enemies);
+        waveSystem.Init(10);
         waveSystem.waveEnded += EndWave;
-        LevelSystem.Init(5, 300);
+        waveSystem.enemyDead += EnemyDead;
+        playerLevel = new PlayerLevel();
+        playerLevel.Init(5, 5, 300, 300);
+        
     }
 
     private void ChangeMana(int value)
@@ -48,7 +57,15 @@ public class Main : MonoBehaviour
     private void EndWave()
     {
         NoMana(false);
-        gridBuildSystem.Refresh(mana);
+        gridBuildSystem.Refresh(mana, playerLevel.GetCurrentLevel());
         // todo endwave оповещение
+    }
+
+    private void EnemyDead(bool isBoss)
+    {
+        if (!isBoss)
+            playerLevel.AddExpEnemy();
+        else
+            playerLevel.AddExpBoss();
     }
 }

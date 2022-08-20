@@ -19,6 +19,7 @@ public class EnemySystem
     private Dictionary<string, Transform> allEnemyModels;
 
     public Action allDead;
+    public Action<bool> enemyDead;
 
     public EnemySystem()
     {
@@ -40,15 +41,15 @@ public class EnemySystem
 
         enemy.SetStats(enemyName, allEnemyStats[waveNumber].health,
             allEnemyStats[waveNumber].armor, allEnemyStats[waveNumber].magicArmor,
-            allEnemyStats[waveNumber].speed);
+            allEnemyStats[waveNumber].speed, waveNumber % 5 == 0 ? true : false);
         enemy.SetPath(path);
         enemy.isDead += EnemyDead;
         enemies.Add(enemy);
     }
 
-    private void EnemyDead()
+    private void EnemyDead(bool isBoss)
     {
-        LevelSystem.AddExpEnemy();
+        enemyDead?.Invoke(isBoss);
         if (AllDead())
             allDead?.Invoke();
     }

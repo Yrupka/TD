@@ -20,9 +20,10 @@ public class Enemy : MonoBehaviour
     public int Speed {get { return speed; } }
     private List<Vector3> path; // путь движения
     private int currentPoint = 0; // текущая точка на поле
+    private bool isBoss;
 
     private Slider healthBar;
-    public Action isDead;
+    public Action<bool> isDead;
 
     public static Transform Create(Transform enemy)
     {
@@ -30,7 +31,7 @@ public class Enemy : MonoBehaviour
         return created;
     }
 
-    public void SetStats(string name, int health, int armor, int magicArmor, int speed)
+    public void SetStats(string name, int health, int armor, int magicArmor, int speed, bool isBoss)
     {
         healthBar = transform.Find("Canvas").Find("HealthBar").GetComponent<Slider>();
         healthBar.maxValue = health;
@@ -42,6 +43,7 @@ public class Enemy : MonoBehaviour
         this.armor = armor;
         this.magicArmor = magicArmor;
         this.speed = speed;
+        this.isBoss = isBoss;
     }
 
     public bool IsDead()
@@ -60,7 +62,7 @@ public class Enemy : MonoBehaviour
 
         if (IsDead())
         {
-            isDead?.Invoke();
+            isDead?.Invoke(isBoss);
             Destroy(gameObject);
         }
             

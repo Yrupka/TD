@@ -16,11 +16,13 @@ public class GridBuildSystem : MonoBehaviour
     private List<Vector3> path;
 
     private int mana;
-    public static Action<int> onManaChange;
+    private int level;
+    public Action<int> onManaChange;
 
-    public void Init(int mana, int height, int width)
+    public void Init(int mana, int level, int height, int width)
     {
         this.mana = mana;
+        this.level = level;
         rock = Resources.Load<Transform>("Prefabs/Rock");
         point = Resources.Load<Transform>("Prefabs/Point");
 
@@ -40,9 +42,10 @@ public class GridBuildSystem : MonoBehaviour
         towerSystem = new TowerSystem();
     }
 
-    public void Refresh(int mana)
+    public void Refresh(int mana, int level)
     {
         this.mana = mana;
+        this.level = level;
     }
 
     private void Update()
@@ -95,7 +98,7 @@ public class GridBuildSystem : MonoBehaviour
                 if (UpdatePath(x, z))
                 {
                     onManaChange?.Invoke(--mana);
-                    towerSystem.Create(grid.GetWorldPos(x, z), LevelSystem.GetCurrentLevel());
+                    towerSystem.Create(grid.GetWorldPos(x, z), level);
                     grid.RemoveBuild(x, z);
                     grid.BuildObject(globalPos, 2);
                 }
@@ -104,7 +107,7 @@ public class GridBuildSystem : MonoBehaviour
                 break;
             case 1:
                 onManaChange?.Invoke(--mana);
-                towerSystem.Create(grid.GetWorldPos(x, z), LevelSystem.GetCurrentLevel());
+                towerSystem.Create(grid.GetWorldPos(x, z), level);
                 grid.RemoveBuild(x, z);
                 grid.BuildObject(globalPos, 2);
                 break;

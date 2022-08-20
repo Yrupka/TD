@@ -3,12 +3,24 @@ using System;
 
 public class MainCamera : MonoBehaviour
 {
-    float edgeOffset = 20f;
-    float moveStep = 40f;
-    float zoomStep = 40f;
-    Vector3 cameraPosition = new Vector3(0, 10, 0);
+    private float edgeOffset;
+    private float moveStep;
+    private float zoomStep;
+    private int maxX;
+    private int maxY;
+    private Vector3 cameraPosition = new Vector3(0, 10, 0);
 
-    public static Action<Transform> selected;
+    public Action<Transform> selected;
+
+    public void Init(int x, int y)
+    {
+        maxX = x;
+        maxY = y;
+
+        edgeOffset = 20f;
+        moveStep = 40f;
+        zoomStep = 40f;
+    }
 
     void Update()
     {
@@ -40,6 +52,9 @@ public class MainCamera : MonoBehaviour
         //вниз
         if (Input.mousePosition.y < edgeOffset)
             cameraPosition.z -= moveStep * Time.deltaTime;
+
+        // ограничение движения камеры
+        cameraPosition.x = Mathf.Clamp(cameraPosition.x, -maxX / 2, maxX / 2);
     }
 
     void MouseCameraScroll()

@@ -11,10 +11,12 @@ public class WaveSystem : MonoBehaviour
     private int waveNum;
     
     public Action waveEnded;
+    public Action<bool> enemyDead;
 
     public void Init(int enemies)
     {
         enemySystem = new EnemySystem();
+        enemySystem.enemyDead += EnemyDead;
         enemySystem.allDead += EndWave;
         wavesAmount = enemySystem.GetWavesNumber();
         enemyCount = enemies;
@@ -39,5 +41,10 @@ public class WaveSystem : MonoBehaviour
     private void EndWave()
     {
         waveEnded?.Invoke();
+    }
+
+    private void EnemyDead(bool isBoss)
+    {
+        enemyDead?.Invoke(isBoss);
     }
 }

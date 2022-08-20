@@ -35,9 +35,6 @@ public class ObjectStats : MonoBehaviour
     private Transform magic;
     private Transform poison;
 
-    // Костыль, не видит raycast'ом UI, за ним находится щит, чтобы тыкать и оно не закрывалось
-    [SerializeField] Transform shield;
-
     private void Start()
     {
         fieldsTextEnemy = new string[2] { "Защита: ", "Скорость: " };
@@ -108,7 +105,6 @@ public class ObjectStats : MonoBehaviour
     private void Visibility(bool state)
     {
         gameObject.SetActive(state);
-        shield.gameObject.SetActive(state);
     }
 
     private void SetActions(Tower tower)

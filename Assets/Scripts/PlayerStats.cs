@@ -2,28 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class LevelSystem
+public class PlayerLevel
 {
     // текущий уровень игрока
-    private static int playerLevel;
-    // количество опыта за противника
-    private static int expEnemy;
-    // количество опыта за босса
-    private static int expBoss;
+    private int playerLevel;
+    // количество опыта и денег за противника
+    private int expEnemy;
+    private int goldEnemy;
+    // количество опыта и денег за босса
+    private int expBoss;
+    private int goldBoss;
     // опыта до следующего уровня
-    private static int[] expLevelAmount;
+    private int[] expLevelAmount;
     // текущее количество опыта
-    private static int expCurrent;
+    private int expCurrent;
 
-    public static void Init(int eEnemy, int eBoss)
+    public void Init(int expEnemy, int goldEnemy, int expBoss, int goldBoss)
     {
         playerLevel = 1;
-        expEnemy = eEnemy;
-        expBoss = eBoss;
+        this.expEnemy = expEnemy;
+        this.goldEnemy = goldEnemy;
+        this.expBoss = expBoss;
+        this.goldBoss = goldBoss;
         expLevelAmount = new int[4] {250, 400, 550, 700};
     }
 
-    private static void CheckExp()
+    private void CheckExp()
     {
         if (playerLevel == 5)
             return;
@@ -34,24 +38,24 @@ public static class LevelSystem
         }
     }
 
-    public static void AddExpEnemy()
+    public void AddExpEnemy()
     {
         expCurrent += expEnemy;
         CheckExp();
     }
 
-    public static void AddExpBoss()
+    public void AddExpBoss()
     {
         expCurrent += expBoss;
         CheckExp();
     }
 
-    public static int GetCurrentLevel()
+    public int GetCurrentLevel()
     {
         return playerLevel;
     }
     
-    public static int[,] GetCurrentExp()
+    public int[,] GetCurrentExp()
     {
         return new int[expCurrent, expLevelAmount[playerLevel - 1]];
     }

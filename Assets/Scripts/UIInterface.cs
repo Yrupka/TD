@@ -12,7 +12,7 @@ public class UIInterface : MonoBehaviour
     private TextMeshProUGUI waveText;
     private TextMeshProUGUI timeText;
 
-    public static Action onStart;
+    public Action onStart;
 
     private void Update()
     {
