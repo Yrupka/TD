@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using UnityEngine.EventSystems;
 
 public class MainCamera : MonoBehaviour
 {
@@ -30,6 +31,10 @@ public class MainCamera : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
+            // мышь над UI, тогда не обрабатывать нажатие
+            if (EventSystem.current.IsPointerOverGameObject())
+                return;
+
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue))
             {
@@ -55,6 +60,7 @@ public class MainCamera : MonoBehaviour
 
         // ограничение движения камеры
         cameraPosition.x = Mathf.Clamp(cameraPosition.x, -maxX / 2, maxX / 2);
+        cameraPosition.z = Mathf.Clamp(cameraPosition.z, -maxY / 2, maxY / 2);
     }
 
     void MouseCameraScroll()

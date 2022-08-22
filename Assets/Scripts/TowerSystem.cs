@@ -41,11 +41,11 @@ public class TowerSystem
 
     // массивы текстур, моделей, параметров вышек
     private AllTowerList[] allTowerStats;
-    private Dictionary<string, Transform> allTowerModels;
     private AllTowerCombination[] allTowerCombination;
+    private Dictionary<string, Transform> allTowerModels;
     private Dictionary<string, Texture2D> textures;
 
-    public static Action<Vector3[]> makeRocks;
+    public Action<Vector3[]> makeRocks;
 
     public TowerSystem()
     {

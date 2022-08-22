@@ -18,6 +18,8 @@ public class GridBuildSystem : MonoBehaviour
     private int mana;
     private int level;
     public Action<int> onManaChange;
+    EnemySystem enemySystem;
+    Transform enemy;
 
     public void Init(int mana, int level, int height, int width)
     {
@@ -40,6 +42,10 @@ public class GridBuildSystem : MonoBehaviour
 
         pathfind = new Pathfind(grid);
         towerSystem = new TowerSystem();
+        towerSystem.makeRocks += UpdateGrid;
+
+        enemySystem = new EnemySystem();
+        enemy = Resources.Load<Transform>("Enemies/Unit 1");
     }
 
     public void Refresh(int mana, int level)
@@ -61,15 +67,14 @@ public class GridBuildSystem : MonoBehaviour
                     GameObject.Destroy(raycastHit.transform.gameObject);
             }
         }
-        // if (Input.GetMouseButtonDown(2))
-        // {
-        //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        //     if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue, LayerMask.GetMask("Ground")))
-        //     {
-        //         Transform spawned = Instantiate(enemy, raycastHit.point, Quaternion.identity);
-        //         enemySystem.Add(spawned);
-        //     }       
-        // }
+        if (Input.GetMouseButtonDown(2))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit raycastHit, float.MaxValue, LayerMask.GetMask("Ground")))
+            {
+                enemySystem.Spawn(0, new List<Vector3>() {raycastHit.point});
+            }       
+        }
     }
 
     private void CreatePoints(Vector3Int[] pointsPos)

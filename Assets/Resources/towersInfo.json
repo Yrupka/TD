@@ -8,69 +8,6 @@
             "magic": 0,
             "poison": 0,
             "targets": 1
-        },
-        {
-            "name": "Poison",
-            "attack": 2,
-            "range": 300,
-            "attackSpeed": 170,
-            "magic": 0,
-            "poison": 2,
-            "targets": 1
-        },
-        {
-            "name": "Swift",
-            "attack": 2,
-            "range": 300,
-            "attackSpeed": 515,
-            "magic": 0,
-            "poison": 0,
-            "targets": 1
-        },
-        {
-            "name": "Speed",
-            "attack": 2,
-            "range": 300,
-            "attackSpeed": 515,
-            "magic": 0,
-            "poison": 0,
-            "targets": 1
-        },
-        {
-            "name": "Common",
-            "attack": 2,
-            "range": 300,
-            "attackSpeed": 515,
-            "magic": 0,
-            "poison": 0,
-            "targets": 1
-        },
-        {
-            "name": "Vision",
-            "attack": 2,
-            "range": 300,
-            "attackSpeed": 515,
-            "magic": 0,
-            "poison": 0,
-            "targets": 1
-        },
-        {
-            "name": "Splash",
-            "attack": 2,
-            "range": 300,
-            "attackSpeed": 515,
-            "magic": 0,
-            "poison": 0,
-            "targets": 1
-        },
-        {
-            "name": "Multi",
-            "attack": 2,
-            "range": 300,
-            "attackSpeed": 515,
-            "magic": 0,
-            "poison": 0,
-            "targets": 4
         }
         
     ]

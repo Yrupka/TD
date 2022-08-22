@@ -21,7 +21,6 @@ public class Main : MonoBehaviour
         mainCamera.Init(37, 37);
         mainCamera.selected += objectStats.Show;
         
-        TowerSystem.makeRocks += gridBuildSystem.UpdateGrid;
         mInterface.onStart += StartWave;
         
 
