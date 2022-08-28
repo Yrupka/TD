@@ -11,8 +11,6 @@ public class TowerSystem
         public int attack;
         public float range;
         public float attackSpeed;
-        public int magic;
-        public int poison;
         public int targets;
     }
 
@@ -44,6 +42,7 @@ public class TowerSystem
     private AllTowerCombination[] allTowerCombination;
     private Dictionary<string, Transform> allTowerModels;
     private Dictionary<string, Texture2D> textures;
+    private Transform towerPrefab;
 
     public Action<Vector3[]> makeRocks;
 
@@ -65,6 +64,7 @@ public class TowerSystem
             allTowerModels.Add(item.name, item);
         var combination = Resources.Load<TextAsset>("towersCombination");
         allTowerCombination = JsonHelper.FromJson<AllTowerCombination>(combination.text);
+        towerPrefab = Resources.Load<Transform>("Prefabs/Tower");
     }
 
     public Transform Create(Vector3 pos, int playerLevel)
@@ -83,11 +83,10 @@ public class TowerSystem
     private Tower MakeTower(Vector3 pos, int towerNumber, int level)
     {
         string towerName = allTowerStats[towerNumber].name;
-        Tower tower = Tower.Create(allTowerModels[towerName], pos, level).GetComponent<Tower>();
+        Tower tower = Tower.Create(towerPrefab, allTowerModels[towerName], pos, level).GetComponent<Tower>();
         tower.SetStats(towerName, level,
             allTowerStats[towerNumber].attack * level, allTowerStats[towerNumber].range,
-            allTowerStats[towerNumber].attackSpeed, allTowerStats[towerNumber].poison,
-            allTowerStats[towerNumber].magic, allTowerStats[towerNumber].targets);
+            allTowerStats[towerNumber].attackSpeed, allTowerStats[towerNumber].targets);
         return tower;
     }
 

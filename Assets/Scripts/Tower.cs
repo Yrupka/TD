@@ -4,31 +4,48 @@ using System;
 public class Tower : MonoBehaviour
 {
     // --- Создание вышки ---
-    [SerializeField] private TowerData towerData;
+    private int attack; // размер атаки
+    public int Attack { get { return attack; } }
+    private float range; // дальность атаки
+    public float Range { get { return range / 100f; } }
+    private float attackSpeed; // скорость атак
+    public float AttackSpeed { get { return 170f / attackSpeed; } }
+    private int level; // уровень вышки (базовых типов)
+    public int Level { get { return level; } }
+    private new string name; // имя вышки
+    public string Name { get { return name; } }
+    private int targets; // количество атакуемых врагов
+    public int Targets {get {return targets; } }
+    public Texture2D[] upgrades; // картинки возможных улучшений
+    public int[] upgradesNum; // индексы доступных улучшений
     private float shootTimer;
-
-    private static Transform towerPrefab;
 
     // обновилась конкретная вышка, номер отражает номер выбранного варианта улучшения
     public Action<Tower> upgraded;
 
-    public static Transform Create( Transform model, Vector3 pos, int level)
+    public static Transform Create(Transform towerPrefab, Transform model, Vector3 pos, int level)
     {
-        towerPrefab = Resources.Load<Transform>("Prefabs/Tower");
         Transform created = Instantiate(towerPrefab, pos, Quaternion.identity);
-        Transform visual = Instantiate(model);
-        visual.SetParent(created.Find("Visual"));
-        visual.localPosition = Vector3.zero;
-        visual.localScale = Vector3.one;
-        visual.parent.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Towers/Animations/" + model.name) as RuntimeAnimatorController;
+        Transform visual = created.Find("Visual");
+        
+        Transform visualModel = Instantiate(model);
+        for (int i = 0; i < visualModel.childCount; i++)
+        {
+            Transform child = visualModel.GetChild(i);
+            child.SetParent(visual);
+            child.localPosition = Vector3.zero;
+            i--;
+        }
+        GameObject.Destroy(visualModel.gameObject);
 
-        created.Find("Visual").localScale += Vector3.one * level / 10f;
-        created.Find("Visual").localPosition = new Vector3(0.5f, 0.2f, 0.5f);
+        visual.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Towers/Animations/" + model.name) as RuntimeAnimatorController;
+        visual.localScale = Vector3.one * 0.5f + (Vector3.one * level / 10f);
+        visual.localPosition = new Vector3(0.5f, 0.2f, 0.5f);
         
         return created;
     }
 
-    public void SetStats(string name, int level, int attack, float range, float attackSpeed, int poison, int magic, int targets)
+    public void SetStats(string name, int level, int attack, float range, float attackSpeed, int targets)
     {
         upgrades = null;
         upgradesNum = null;
@@ -38,8 +55,6 @@ public class Tower : MonoBehaviour
         this.attack = attack;
         this.range = range;
         this.attackSpeed = attackSpeed;
-        this.poison = poison;
-        this.magic = magic;
         this.targets = targets;
     }
 

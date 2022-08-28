@@ -17,6 +17,7 @@ public class EnemySystem
     private static List<Enemy> enemies;
     private AllEnemyList[] allEnemyStats;
     private Dictionary<string, Transform> allEnemyModels;
+    private Transform enemyPrefab;
 
     public Action allDead;
     public Action<bool> enemyDead;
@@ -32,12 +33,13 @@ public class EnemySystem
         allEnemyModels = new Dictionary<string, Transform>();
         foreach (var item in models)
             allEnemyModels.Add(item.name, item);
+        enemyPrefab = Resources.Load<Transform>("Prefabs/Enemy");
     }
 
     public void Spawn(int waveNumber, List<Vector3> path)
     {
         string enemyName = allEnemyStats[waveNumber].name;
-        Enemy enemy = Enemy.Create(allEnemyModels[enemyName]).GetComponent<Enemy>();
+        Enemy enemy = Enemy.Create(enemyPrefab, allEnemyModels[enemyName]).GetComponent<Enemy>();
 
         enemy.SetStats(enemyName, allEnemyStats[waveNumber].health,
             allEnemyStats[waveNumber].armor, allEnemyStats[waveNumber].magicArmor,

@@ -25,9 +25,24 @@ public class Enemy : MonoBehaviour
     private Slider healthBar;
     public Action<bool> isDead;
 
-    public static Transform Create(Transform enemy)
+    public static Transform Create(Transform enemyPrefab, Transform model)
     {
-        Transform created = Instantiate(enemy, new Vector3(-14.5f, 0f, 13.5f), Quaternion.identity);
+        Transform created = Instantiate(enemyPrefab, new Vector3(-14.5f, 0f, 13.5f), Quaternion.identity);
+        Transform visual = created.Find("Visual");
+        
+        Transform visualModel = Instantiate(model);
+        for (int i = 0; i < visualModel.childCount; i++)
+        {
+            Transform child = visualModel.GetChild(i);
+            child.SetParent(visual);
+            child.localPosition = Vector3.zero;
+            i--;
+        }
+        GameObject.Destroy(visualModel.gameObject);
+
+        visual.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Enemies/Animations/" + model.name) as RuntimeAnimatorController;
+        visual.localPosition = new Vector3(0.5f, 0.2f, 0.5f);
+        
         return created;
     }
 

@@ -170,8 +170,8 @@ public class ObjectStats : MonoBehaviour
         // включить отображение характеристик
         fieldsTower[1].transform.parent.gameObject.SetActive(true);
 
-        SetEffect(Effects.magic, tower.Magic);
-        SetEffect(Effects.poison, tower.Poison);
+        //SetEffect(Effects.magic, tower.Magic);
+        //SetEffect(Effects.poison, tower.Poison);
         effects.gameObject.SetActive(true);
     }
 
