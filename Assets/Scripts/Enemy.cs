@@ -11,7 +11,7 @@ public class Enemy : MonoBehaviour
     private int health; // количество здоровья
     public int Health {get { return health; } }
     private int currHealth; // текущее количество здоровья
-    public int CurrentHealth {get { return currHealth; } }
+    public int CurrentHealth {get { return currHealth; } set { currHealth = value; } }
     private int armor; // количество брони
     public int Armor {get { return armor; } }
     private int magicArmor; // количество магической брони

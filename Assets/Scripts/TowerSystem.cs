@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class TowerSystem
 {
-    [System.Serializable]
-    private class AllTowerList
-    {
-        public string name;
-        public int attack;
-        public float range;
-        public float attackSpeed;
-        public int targets;
-    }
+    // [System.Serializable]
+    // private class AllTowerList
+    // {
+    //     public string name;
+    //     public int attack;
+    //     public float range;
+    //     public float attackSpeed;
+    //     public int targets;
+    // }
 
     [System.Serializable]
     private class AllTowerCombination
@@ -38,8 +38,8 @@ public class TowerSystem
     private List<Tower> newPlacedTowers;
 
     // массивы текстур, моделей, параметров вышек
-    private AllTowerList[] allTowerStats;
     private AllTowerCombination[] allTowerCombination;
+    private Dictionary<string, TowerData> allTowerStats;
     private Dictionary<string, Transform> allTowerModels;
     private Dictionary<string, Texture2D> textures;
     private Transform towerPrefab;
@@ -56,20 +56,22 @@ public class TowerSystem
         foreach (var item in images)
             textures.Add(item.name, item);
 
-        var info = Resources.Load<TextAsset>("towersInfo");
-        allTowerStats = JsonHelper.FromJson<AllTowerList>(info.text);
+        // var info = Resources.Load<TextAsset>("towersInfo");
         var models = Resources.LoadAll<Transform>("Towers");
         allTowerModels = new Dictionary<string, Transform>();
         foreach (var item in models)
             allTowerModels.Add(item.name, item);
         var combination = Resources.Load<TextAsset>("towersCombination");
+        var stats  = Resources.LoadAll<TowerData>("Towers/Data");
+        foreach (var item in stats)
+            allTowerStats.Add(item.Name, item);
         allTowerCombination = JsonHelper.FromJson<AllTowerCombination>(combination.text);
         towerPrefab = Resources.Load<Transform>("Prefabs/Tower");
     }
 
     public Transform Create(Vector3 pos, int playerLevel)
     {
-        int towerNumber = UnityEngine.Random.Range(0, allTowerStats.Length); // тип вышки
+        int towerNumber = UnityEngine.Random.Range(0, allTowerStats.Count); // тип вышки
         int towerLevel = UnityEngine.Random.Range(1, playerLevel + 1); // уровень от 1 до текущего уровня (верхняя граница не включается)
         Tower tower = MakeTower(pos, towerNumber, towerLevel);
         // можно создать 5 вышек за раз
@@ -82,11 +84,11 @@ public class TowerSystem
 
     private Tower MakeTower(Vector3 pos, int towerNumber, int level)
     {
-        string towerName = allTowerStats[towerNumber].name;
+        //string towerName = allTowerStats[towerNumber].name;
         Tower tower = Tower.Create(towerPrefab, allTowerModels[towerName], pos, level).GetComponent<Tower>();
-        tower.SetStats(towerName, level,
-            allTowerStats[towerNumber].attack * level, allTowerStats[towerNumber].range,
-            allTowerStats[towerNumber].attackSpeed, allTowerStats[towerNumber].targets);
+        // tower.SetStats(towerName, level,
+        //     allTowerStats[towerNumber].attack * level, allTowerStats[towerNumber].range,
+        //     allTowerStats[towerNumber].attackSpeed, allTowerStats[towerNumber].targets);
         return tower;
     }
 
