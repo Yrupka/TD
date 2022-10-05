@@ -40,8 +40,8 @@ public class TowerSystem
     // массивы текстур, моделей, параметров вышек
     private AllTowerCombination[] allTowerCombination;
     private Dictionary<string, TowerData> allTowerStats;
-    private Dictionary<string, Transform> allTowerModels;
     private Dictionary<string, Texture2D> textures;
+    private string[] baseTowers;
     private Transform towerPrefab;
 
     public Action<Vector3[]> makeRocks;
@@ -56,17 +56,27 @@ public class TowerSystem
         foreach (var item in images)
             textures.Add(item.name, item);
 
-        // var info = Resources.Load<TextAsset>("towersInfo");
-        var models = Resources.LoadAll<Transform>("Towers");
-        allTowerModels = new Dictionary<string, Transform>();
-        foreach (var item in models)
-            allTowerModels.Add(item.name, item);
+        towerPrefab = Resources.Load<Transform>("Prefabs/Tower");
+
         var combination = Resources.Load<TextAsset>("towersCombination");
-        var stats  = Resources.LoadAll<TowerData>("Towers/Data");
+        
+        allTowerStats = new Dictionary<string, TowerData>();
+        var stats  = Resources.LoadAll<TowerData>("Towers/BaseTowersData");
+        baseTowers = new string[stats.Length];
+        
+        int count = 0;
+        foreach (var item in stats)
+        {
+            allTowerStats.Add(item.Name, item);
+            baseTowers[count] = item.Name;
+            count++;
+        }
+
+        stats  = Resources.LoadAll<TowerData>("Towers/TowersData");
         foreach (var item in stats)
             allTowerStats.Add(item.Name, item);
+            
         allTowerCombination = JsonHelper.FromJson<AllTowerCombination>(combination.text);
-        towerPrefab = Resources.Load<Transform>("Prefabs/Tower");
     }
 
     public Transform Create(Vector3 pos, int playerLevel)
@@ -84,11 +94,12 @@ public class TowerSystem
 
     private Tower MakeTower(Vector3 pos, int towerNumber, int level)
     {
-        //string towerName = allTowerStats[towerNumber].name;
-        Tower tower = Tower.Create(towerPrefab, allTowerModels[towerName], pos, level).GetComponent<Tower>();
-        // tower.SetStats(towerName, level,
-        //     allTowerStats[towerNumber].attack * level, allTowerStats[towerNumber].range,
-        //     allTowerStats[towerNumber].attackSpeed, allTowerStats[towerNumber].targets);
+        string towerName = "";
+        if (level == 0)
+            towerName = allTowerStats[baseTowers[towerNumber]].name;
+        
+        Tower tower = Tower.Create(towerPrefab, allTowerStats[towerName].Model, pos, level).GetComponent<Tower>();
+        tower.SetStats(allTowerStats[towerName]);
         return tower;
     }
 
@@ -103,9 +114,9 @@ public class TowerSystem
             // найдена ли вышка в списке комбинаций
             for (int i = 0; i < allTowerCombination.Length; i++)
             {
-                string towerName = tower.Name;
-                if (tower.Level != 0)
-                    towerName += tower.Level.ToString();
+                string towerName = tower.data.Name;
+                if (tower.data.Level != 0)
+                    towerName += tower.data.Level.ToString();
                 int upgradePos = allTowerCombination[i].Check(towerName);
                 // если имя вышки содержится в списке улучшений, то данный номер запомнить
                 if (upgradePos != -1)
@@ -129,15 +140,15 @@ public class TowerSystem
                 {
                     for (int i = 0; i < 3; i++)
                     {
-                        if (tower.upgrades == null)
+                        if (tower.data.upgrades == null)
                         {
-                            tower.upgrades = new Texture2D[3];
-                            tower.upgradesNum = new int[3];
+                            tower.data.upgrades = new Texture2D[3];
+                            tower.data.upgradesNum = new int[3];
                         }
-                        if (tower.upgrades[i] == null)
+                        if (tower.data.upgrades[i] == null)
                         {
-                            tower.upgrades[i] = textures[allTowerCombination[item.Key].result];
-                            tower.upgradesNum[i] = upgradeNum;
+                            tower.data.upgrades[i] = textures[allTowerCombination[item.Key].result];
+                            tower.data.upgradesNum[i] = upgradeNum;
                             break;
                         }
                     }
@@ -156,32 +167,32 @@ public class TowerSystem
         foreach (var item in newPlacedTowers)
         {
             int emptySlot = 0;
-            if (item.upgrades == null)
+            if (item.data.upgrades == null)
             {
-                item.upgrades = new Texture2D[3];
-                item.upgradesNum = new int[3];
+                item.data.upgrades = new Texture2D[3];
+                item.data.upgradesNum = new int[3];
             }
             else
             {
                 // если есть улучшения, то первый слот(индекс 0) точно будет занят, ищем пусто место среди оставшихся
-                if (item.upgrades[1] == null)
+                if (item.data.upgrades[1] == null)
                     emptySlot = 1;
                 else
                     emptySlot = 2;
             }
-            item.upgrades[emptySlot] = textures[item.Name];
-            item.upgradesNum[emptySlot] = -1;
+            item.data.upgrades[emptySlot] = textures[item.data.Name];
+            item.data.upgradesNum[emptySlot] = -1;
         }
     }
 
     // Оставить одну, выбранную вышку, удалить остальные, имеющие возможность улучшения
     public void ChooseOne(Tower tower)
     {
-        if (tower.upgradesNum[0] == -1)
+        if (tower.data.upgradesNum[0] == -1)
         {
             int towerIndex = towers.IndexOf(tower);
-            towers[towerIndex].upgrades = null;
-            towers[towerIndex].upgradesNum = null;
+            towers[towerIndex].data.upgrades = null;
+            towers[towerIndex].data.upgradesNum = null;
             
             newPlacedTowers.Remove(tower);
 
@@ -191,13 +202,13 @@ public class TowerSystem
         }
 
         // улучшаемая вышка удаляется, на ее место ставиться улучшенная
-        Tower newTower = MakeTower(tower.transform.position, tower.upgradesNum[0], 0);
+        Tower newTower = MakeTower(tower.transform.position, tower.data.upgradesNum[0], 0);
         newTower.upgraded += ChooseOne;
         towers.Add(newTower);
 
         // необходимо запомнить номер вышки, которая выбрана как улучшение
         // чтобы удалить 2 остальных вышки (в возможных улучшениях у них тот же номер)
-        int number = tower.upgradesNum[0];
+        int number = tower.data.upgradesNum[0];
         towers.Remove(tower);
         GameObject.Destroy(tower.gameObject);
 
@@ -210,13 +221,13 @@ public class TowerSystem
         string deletedTowerName = "";
         for (int i = 0; i < towers.Count; i++)
         {
-            if (tower.upgrades == null)
+            if (tower.data.upgrades == null)
                 return;
             for (int k = 0; k < 3; k++)
             {
-                if (towers[i].upgradesNum[k] == number && towers[i].Name != deletedTowerName)
+                if (towers[i].data.upgradesNum[k] == number && towers[i].data.Name != deletedTowerName)
                 {
-                    deletedTowerName = towers[i].Name;
+                    deletedTowerName = towers[i].data.Name;
                     rocks.Add(towers[i].transform.position);
 
                     towers.Remove(towers[i]);

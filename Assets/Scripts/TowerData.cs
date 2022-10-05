@@ -3,6 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New TowerData", menuName = "Tower Data", order = 51)]
 public class TowerData : ScriptableObject
 {
+    [SerializeField] private Transform model; // модель
+    public Transform Model { get { return model; } }
     [SerializeField] private int attack; // размер атаки
     public int Attack { get { return attack; } }
     [SerializeField] private float range; // дальность атаки

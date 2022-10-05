@@ -109,7 +109,7 @@ public class ObjectStats : MonoBehaviour
 
     private void SetActions(Tower tower)
     {
-        if (tower.upgrades == null)
+        if (tower.data.upgrades == null)
         {
             for (int i = 1; i <= 3; i++)
                 actions.Find($"A{i}").gameObject.SetActive(false);
@@ -118,17 +118,17 @@ public class ObjectStats : MonoBehaviour
             
         for (int i = 0; i < 3; i++)
         {
-            if (tower.upgrades[i] == null)
+            if (tower.data.upgrades[i] == null)
                 break;
-            if (tower.Level != 0)
+            if (tower.data.Level != 0)
             {
-                levelText.text = tower.Level.ToString();
+                levelText.text = tower.data.Level.ToString();
                 levelText.gameObject.SetActive(true);
             }
 
             Transform action = actions.Find($"A{i + 1}");
             action.gameObject.SetActive(true);
-            action.GetComponent<RawImage>().texture = tower.upgrades[i];
+            action.GetComponent<RawImage>().texture = tower.data.upgrades[i];
             action.GetComponent<Button>().onClick.RemoveAllListeners();
             action.GetComponent<Button>().onClick.AddListener(() => TowerPicked(tower, action.name));
         }
@@ -138,7 +138,7 @@ public class ObjectStats : MonoBehaviour
     private void TowerPicked(Tower tower, string name)
     {
         int slotNum = int.Parse(name.Substring(1)) - 1;
-        tower.upgradesNum[0] = tower.upgradesNum[slotNum];
+        tower.data.upgradesNum[0] = tower.data.upgradesNum[slotNum];
         tower.upgraded?.Invoke(tower);
         Visibility(false);
     }
@@ -157,15 +157,15 @@ public class ObjectStats : MonoBehaviour
             return;
         }
 
-        string name = translates[tower.Name] + " ";
-        if (tower.Level != 0)
-            name += tower.Level.ToString();
+        string name = translates[tower.data.Name] + " ";
+        if (tower.data.Level != 0)
+            name += tower.data.Level.ToString();
 
         fieldsTower[0].SetText(name);
-        fieldsTower[1].SetText(fieldsTextTower[0] + tower.Attack.ToString());
+        fieldsTower[1].SetText(fieldsTextTower[0] + tower.data.Attack.ToString());
         fieldsEnemy[1].SetText("Неуязвимость");
-        fieldsTower[2].SetText(fieldsTextTower[1] + tower.AttackSpeed.ToString());
-        fieldsTower[3].SetText(fieldsTextTower[2] + tower.Range.ToString());
+        fieldsTower[2].SetText(fieldsTextTower[1] + tower.data.AttackSpeed.ToString());
+        fieldsTower[3].SetText(fieldsTextTower[2] + tower.data.Range.ToString());
 
         // включить отображение характеристик
         fieldsTower[1].transform.parent.gameObject.SetActive(true);

@@ -18,13 +18,13 @@ public class Tower : MonoBehaviour
     // public int Targets {get {return targets; } }
     // public Texture2D[] upgrades; // картинки возможных улучшений
     // public int[] upgradesNum; // индексы доступных улучшений
-    TowerData data;
+    public TowerData data;
     private float shootTimer;
 
     // обновилась конкретная вышка, номер отражает номер выбранного варианта улучшения
     public Action<Tower> upgraded;
 
-    public static Transform Create(Transform towerPrefab, Transform model, Vector3 pos, int level, TowerData data)
+    public static Transform Create(Transform towerPrefab, Transform model, Vector3 pos, int level)
     {
         Transform created = Instantiate(towerPrefab, pos, Quaternion.identity);
         Transform visual = created.Find("Visual");
@@ -46,18 +46,10 @@ public class Tower : MonoBehaviour
         return created;
     }
 
-    // public void SetStats(string name, int level, int attack, float range, float attackSpeed, int targets)
-    // {
-    //     upgrades = null;
-    //     upgradesNum = null;
-
-    //     this.name = name;
-    //     this.level = level;
-    //     this.attack = attack;
-    //     this.range = range;
-    //     this.attackSpeed = attackSpeed;
-    //     this.targets = targets;
-    // }
+    public void SetStats(TowerData data)
+    {
+        this.data = data;
+    }
 
     // --- Атака вышки ---
     private void Update()
